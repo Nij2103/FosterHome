@@ -1,0 +1,432 @@
+/*
+ * ============================================================
+ * Foster Care Placement System — Responsive Stylesheet
+ * responsive.css
+ *
+ * All media queries organized by breakpoint (mobile-first):
+ *   sm  — 576px+
+ *   md  — 768px+
+ *   lg  — 992px+
+ *   xl  — 1200px+
+ *   xs  — below 576px (overrides)
+ * ============================================================
+ */
+
+/* ============================================================
+   EXTRA SMALL — below 576px (Mobile Portrait)
+   ============================================================ */
+@media (max-width: 575.98px) {
+
+  /* Navbar */
+  .fc-navbar {
+    height: auto;
+    min-height: 60px;
+    padding: 0.5rem 0;
+  }
+
+  .fc-navbar-brand .fc-logo-text span {
+    display: none; /* Hide subtitle on mobile */
+  }
+
+  .fc-navbar .navbar-collapse {
+    border-top: 1px solid var(--fc-border);
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .fc-navbar .nav-link {
+    padding: 0.5rem 0.25rem !important;
+    border-radius: 0;
+    border-bottom: 1px solid var(--fc-border);
+  }
+
+  .fc-navbar .nav-link:last-child {
+    border-bottom: none;
+  }
+
+  /* Buttons in nav */
+  .fc-navbar .btn-nav-login,
+  .fc-navbar .btn-nav-register {
+    display: block;
+    text-align: center;
+    margin-top: 0.5rem;
+    width: 100%;
+  }
+
+  /* Hero */
+  .fc-hero {
+    padding: 2.5rem 0;
+    min-height: auto;
+  }
+
+  .fc-hero-title {
+    font-size: 1.875rem;
+  }
+
+  .fc-hero-desc {
+    font-size: 0.9375rem;
+  }
+
+  .fc-hero-actions {
+    flex-direction: column;
+  }
+
+  .fc-hero-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .fc-hero-visual {
+    margin-top: 2rem;
+  }
+
+  /* Stats strip */
+  .fc-stats-strip .fc-stat-item {
+    padding: 0.75rem;
+  }
+
+  .fc-stat-number {
+    font-size: 1.625rem;
+  }
+
+  /* Stat Cards */
+  .fc-stat-card {
+    padding: 1.25rem;
+  }
+
+  .fc-stat-card-value {
+    font-size: 1.625rem;
+  }
+
+  /* Section padding */
+  .fc-section {
+    padding: 2rem 0;
+  }
+
+  .fc-section-sm {
+    padding: 1.5rem 0;
+  }
+
+  /* Auth card */
+  .fc-auth-card {
+    padding: 1.5rem;
+    margin: 0 0.5rem;
+    border-radius: var(--fc-radius);
+  }
+
+  /* Tables */
+  .fc-table-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .fc-table-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .table-responsive {
+    font-size: 0.8125rem;
+  }
+
+  /* Detail view */
+  .fc-detail-header {
+    text-align: center;
+  }
+
+  .fc-detail-header .d-flex {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .fc-info-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Score circle */
+  .fc-score-circle {
+    width: 130px;
+    height: 130px;
+  }
+
+  .fc-score-number {
+    font-size: 2rem;
+  }
+
+  /* Form sections */
+  .fc-form-section {
+    padding: 1.25rem;
+  }
+
+  /* CTA banner */
+  .fc-cta-banner h2 {
+    font-size: 1.5rem;
+  }
+
+  .fc-cta-banner p {
+    font-size: 0.9375rem;
+  }
+
+  /* Footer */
+  .fc-footer {
+    padding: 2rem 0 1rem;
+  }
+
+  .fc-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+
+  /* Page header */
+  .fc-page-header h1 {
+    font-size: 1.375rem;
+  }
+
+  /* Delete card */
+  .fc-delete-card {
+    padding: 1.5rem;
+    margin: 1.5rem 0.5rem;
+  }
+
+  /* Filter bar */
+  .fc-filter-bar .row > [class*='col-'] {
+    margin-bottom: 0.5rem;
+  }
+
+  /* Announcement cards */
+  .fc-announcement-card {
+    padding: 0.875rem 1rem;
+  }
+
+  /* Step items */
+  .fc-step {
+    flex-direction: column;
+    padding: 1rem;
+  }
+
+  /* Section title */
+  .fc-section-title {
+    font-size: 1.5rem;
+  }
+}
+
+/* ============================================================
+   SMALL — 576px to 767.98px (Mobile Landscape / Small Tablet)
+   ============================================================ */
+@media (min-width: 576px) and (max-width: 767.98px) {
+
+  .fc-hero {
+    padding: 3rem 0;
+    min-height: auto;
+  }
+
+  .fc-hero-title {
+    font-size: 2.25rem;
+  }
+
+  .fc-hero-visual {
+    margin-top: 2.5rem;
+  }
+
+  .fc-auth-card {
+    padding: 2rem;
+  }
+
+  .fc-info-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .fc-stats-strip .row > [class*='col-'] {
+    border-right: 1px solid var(--fc-border);
+  }
+
+  .fc-stats-strip .row > [class*='col-']:last-child {
+    border-right: none;
+  }
+}
+
+/* ============================================================
+   MEDIUM — 768px to 991.98px (Tablet)
+   ============================================================ */
+@media (min-width: 768px) and (max-width: 991.98px) {
+
+  .fc-hero {
+    padding: 3.5rem 0;
+  }
+
+  .fc-hero-title {
+    font-size: 2.5rem;
+  }
+
+  .fc-hero-visual {
+    margin-top: 0;
+  }
+
+  .fc-info-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .fc-stat-card-value {
+    font-size: 1.75rem;
+  }
+
+  /* Nav on tablet — still collapses */
+  .fc-navbar .navbar-collapse {
+    border-top: 1px solid var(--fc-border);
+    margin-top: 0.5rem;
+    padding-top: 0.75rem;
+  }
+}
+
+/* ============================================================
+   LARGE — 992px to 1199.98px (Desktop)
+   ============================================================ */
+@media (min-width: 992px) {
+
+  /* Navbar */
+  .fc-navbar {
+    height: var(--fc-navbar-height);
+  }
+
+  .fc-navbar .navbar-collapse {
+    border-top: none;
+    margin-top: 0;
+    padding-top: 0;
+  }
+
+  /* Hero */
+  .fc-hero {
+    min-height: calc(100vh - var(--fc-navbar-height) - 80px);
+  }
+
+  /* Info grid — full columns */
+  .fc-info-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+
+  /* Stats strip borders */
+  .fc-stat-item + .fc-stat-item {
+    border-left: 1px solid var(--fc-border);
+  }
+}
+
+/* ============================================================
+   EXTRA LARGE — 1200px+ (Wide Desktop)
+   ============================================================ */
+@media (min-width: 1200px) {
+
+  .fc-hero-title {
+    font-size: 3.25rem;
+  }
+
+  .fc-section-title {
+    font-size: 2rem;
+  }
+
+  .fc-stat-card-value {
+    font-size: 1.875rem;
+  }
+}
+
+/* ============================================================
+   PRINT STYLES
+   ============================================================ */
+@media print {
+
+  .fc-navbar,
+  .fc-footer,
+  .fc-cta-banner,
+  .fc-filter-bar,
+  .fc-table-header .btn,
+  .fc-table-footer .pagination,
+  .fc-hero-actions,
+  form[method="post"],
+  .btn-icon,
+  .dropdown {
+    display: none !important;
+  }
+
+  body {
+    font-size: 11pt;
+    color: #000;
+    background: #fff;
+  }
+
+  .fc-stat-card,
+  .fc-card,
+  .fc-feature-card,
+  .fc-table-wrapper {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+
+  .table {
+    font-size: 9pt;
+  }
+
+  .fc-score-circle {
+    border-width: 3px;
+  }
+
+  a[href]::after {
+    content: none;
+  }
+
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+
+  tr, .fc-stat-card {
+    page-break-inside: avoid;
+  }
+}
+
+/* ============================================================
+   UTILITY — Overflow / Scrollbar fixes
+   ============================================================ */
+
+/* Prevent horizontal scroll at all times */
+html, body {
+  overflow-x: hidden;
+  max-width: 100%;
+}
+
+/* Thin scrollbar for sidebar / overflow areas */
+.fc-ml-report::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.fc-ml-report::-webkit-scrollbar-thumb,
+.table-responsive::-webkit-scrollbar-thumb {
+  background-color: var(--fc-border-strong);
+  border-radius: var(--fc-radius-full);
+}
+
+.fc-ml-report::-webkit-scrollbar-track,
+.table-responsive::-webkit-scrollbar-track {
+  background-color: var(--fc-bg-secondary);
+}
+
+/* ============================================================
+   ACCESSIBILITY — Reduced Motion
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .fc-card:hover,
+  .fc-feature-card:hover,
+  .fc-stat-card:hover {
+    transform: none;
+  }
+}

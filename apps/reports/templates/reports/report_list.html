@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Reports Library{% endblock %}
+{% block meta_description %}Access, generate, and download formal child welfare and placement analytical reports.{% endblock %}
+
+{% block content %}
+
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Reports</li>
+      </ol>
+    </nav>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
+      <div>
+        <h1 class="mb-0">Reports Library</h1>
+        <p class="fc-breadcrumb mt-1">Exportable PDF and analytical reports for stakeholders and audit compliance</p>
+      </div>
+      {% if request.user.profile.is_admin or request.user.is_superuser %}
+        <form method="post" action="{% url 'reports:trigger_scrape' %}" class="d-inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary btn-sm btn-icon" onclick="return confirm('Re-ingest fixture reports into system database?');">
+            <i class="bi bi-cloud-download" aria-hidden="true"></i> Re-ingest Reports
+          </button>
+        </form>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <div class="row g-4">
+
+    <!-- Card 1: Executive Dashboard PDF -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="fc-card h-100 d-flex flex-column justify-content-between">
+        <div class="fc-card-body">
+          <div class="fc-feature-icon mb-3" style="width:48px;height:48px;font-size:1.25rem;">
+            <i class="bi bi-file-earmark-pdf-fill text-danger" aria-hidden="true"></i>
+          </div>
+          <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:0.5rem;">Dashboard Summary PDF</h3>
+          <p style="font-size:0.875rem; color:var(--fc-text-muted); line-height:1.6;">
+            A printable summary document containing active placement statistics, total registered children, family availability metrics, and top visual charts.
+          </p>
+        </div>
+        <div class="fc-card-footer bg-white border-top-0 pt-0">
+          <a href="{% url 'analytics:export_dashboard_pdf' %}" class="btn btn-outline-primary btn-sm btn-icon w-100 justify-content-center">
+            <i class="bi bi-file-earmark-pdf" aria-hidden="true"></i> PDF
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 2: ML Model Benchmark Report -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="fc-card h-100 d-flex flex-column justify-content-between">
+        <div class="fc-card-body">
+          <div class="fc-feature-icon mb-3" style="width:48px;height:48px;font-size:1.25rem; background:var(--fc-accent-light); color:var(--fc-accent);">
+            <i class="bi bi-clipboard-data-fill" aria-hidden="true"></i>
+          </div>
+          <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:0.5rem;">ML Model Performance Report</h3>
+          <p style="font-size:0.875rem; color:var(--fc-text-muted); line-height:1.6;">
+            Detailed evaluation of classification algorithms (Random Forest, Gradient Boosting, Logistic Regression) with accuracy, F1 scores, and ROC metrics.
+          </p>
+        </div>
+        <div class="fc-card-footer bg-white border-top-0 pt-0">
+          <a href="{% url 'analytics:model_comparison' %}" class="btn btn-outline-primary btn-sm btn-icon w-100 justify-content-center">
+            <i class="bi bi-eye" aria-hidden="true"></i> View
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 3: Children Data Export -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="fc-card h-100 d-flex flex-column justify-content-between">
+        <div class="fc-card-body">
+          <div class="fc-feature-icon mb-3" style="width:48px;height:48px;font-size:1.25rem; background:#E8F5E9; color:var(--fc-primary);">
+            <i class="bi bi-file-earmark-spreadsheet-fill" aria-hidden="true"></i>
+          </div>
+          <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:0.5rem;">Children Registry Dataset</h3>
+          <p style="font-size:0.875rem; color:var(--fc-text-muted); line-height:1.6;">
+            Export filtered or complete child demographic profiles, time-in-care metrics, and special needs indicators in spreadsheet format.
+          </p>
+        </div>
+        <div class="fc-card-footer bg-white border-top-0 pt-0">
+          <a href="{% url 'children:export_csv' %}" class="btn btn-secondary btn-sm w-100 text-center"><i class="bi bi-filetype-csv me-1"></i> Export CSV</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 4: Foster Families Dataset -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="fc-card h-100 d-flex flex-column justify-content-between">
+        <div class="fc-card-body">
+          <div class="fc-feature-icon mb-3" style="width:48px;height:48px;font-size:1.25rem; background:#E8F5E9; color:var(--fc-primary);">
+            <i class="bi bi-house-gear-fill" aria-hidden="true"></i>
+          </div>
+          <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:0.5rem;">Foster Family Registry Dataset</h3>
+          <p style="font-size:0.875rem; color:var(--fc-text-muted); line-height:1.6;">
+            Download foster family home profiles, capacity slots, experience years, and active placement statuses in structured format.
+          </p>
+        </div>
+        <div class="fc-card-footer bg-white border-top-0 pt-0">
+          <a href="{% url 'families:export_csv' %}" class="btn btn-secondary btn-sm w-100 text-center"><i class="bi bi-filetype-csv me-1"></i> Export CSV</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 5: Predictions Log Export -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="fc-card h-100 d-flex flex-column justify-content-between">
+        <div class="fc-card-body">
+          <div class="fc-feature-icon mb-3" style="width:48px;height:48px;font-size:1.25rem; background:#FFF8E1; color:var(--fc-warning);">
+            <i class="bi bi-cpu-fill" aria-hidden="true"></i>
+          </div>
+          <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:0.5rem;">Predictions Audit Trail</h3>
+          <p style="font-size:0.875rem; color:var(--fc-text-muted); line-height:1.6;">
+            Complete audit trail of ML compatibility scores generated across all caseworker sessions with model engine metadata.
+          </p>
+        </div>
+        <div class="fc-card-footer bg-white border-top-0 pt-0">
+          <a href="{% url 'predictions:export_csv' %}" class="btn btn-outline-primary btn-sm btn-icon w-100 justify-content-center">
+            <i class="bi bi-download" aria-hidden="true"></i> Log
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 6: Placements Log Export -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="fc-card h-100 d-flex flex-column justify-content-between">
+        <div class="fc-card-body">
+          <div class="fc-feature-icon mb-3" style="width:48px;height:48px;font-size:1.25rem; background:#E1F5FE; color:var(--fc-info);">
+            <i class="bi bi-shuffle" aria-hidden="true"></i>
+          </div>
+          <h3 style="font-size:1.125rem; font-weight:700; margin-bottom:0.5rem;">Placements Audit Log</h3>
+          <p style="font-size:0.875rem; color:var(--fc-text-muted); line-height:1.6;">
+            Historical record of all formal child placements, including start/end dates, current lifecycle statuses, and disruption notes.
+          </p>
+        </div>
+        <div class="fc-card-footer bg-white border-top-0 pt-0">
+          <a href="{% url 'placements:export_csv' %}" class="btn btn-outline-primary btn-sm btn-icon w-100 justify-content-center">
+            <i class="bi bi-download" aria-hidden="true"></i> Log
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

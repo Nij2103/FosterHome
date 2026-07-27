@@ -1,0 +1,279 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Prediction Report — {{ prediction.child.first_name }} × {{ prediction.family.family_name }}{% endblock %}
+
+{% block content %}
+
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'predictions:index' %}">Predictions</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Report #{{ prediction.pk }}</li>
+      </ol>
+    </nav>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
+      <div>
+        <h1 class="mb-0">Placement Compatibility Report</h1>
+        <p class="fc-breadcrumb mt-1">Evaluation of {{ prediction.child.first_name }} and {{ prediction.family.family_name }}</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="{% url 'predictions:export_pdf' prediction.pk %}" class="btn btn-secondary btn-sm btn-icon">
+          <i class="bi bi-file-earmark-pdf-fill text-danger" aria-hidden="true"></i> Export PDF Report
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <div class="row g-4">
+
+    <!-- Score Display -->
+    <div class="col-12 col-lg-4">
+      <div class="fc-card h-100">
+        <div class="fc-card-header">Model Prediction Result</div>
+        <div class="fc-card-body fc-score-display">
+
+          {% if prediction.compatibility_score >= 0.7 %}
+            <div class="fc-score-circle high">
+              <span class="fc-score-number">{{ prediction.compatibility_score|floatformat:2 }}</span>
+              <span class="fc-score-unit">/ 1.00</span>
+            </div>
+            <div class="fc-score-label text-success mb-2">High Compatibility</div>
+            <p style="font-size:0.8125rem; color:var(--fc-text-muted);">
+              The model indicates a high probability of a successful, stable placement with low disruption risk.
+            </p>
+          {% elif prediction.compatibility_score >= 0.4 %}
+            <div class="fc-score-circle medium">
+              <span class="fc-score-number">{{ prediction.compatibility_score|floatformat:2 }}</span>
+              <span class="fc-score-unit">/ 1.00</span>
+            </div>
+            <div class="fc-score-label text-warning mb-2">Moderate Compatibility</div>
+            <p style="font-size:0.8125rem; color:var(--fc-text-muted);">
+              Moderate compatibility. Review support services and special needs alignment before finalizing.
+            </p>
+          {% else %}
+            <div class="fc-score-circle low">
+              <span class="fc-score-number">{{ prediction.compatibility_score|floatformat:2 }}</span>
+              <span class="fc-score-unit">/ 1.00</span>
+            </div>
+            <div class="fc-score-label text-danger mb-2">Low Compatibility</div>
+            <p style="font-size:0.8125rem; color:var(--fc-text-muted);">
+              Higher disruption risk predicted. Additional caseworker evaluation or alternative placement recommended.
+            </p>
+          {% endif %}
+
+          <hr class="my-3">
+
+          <!-- Model Meta -->
+          <div class="text-start" style="font-size:0.8125rem;">
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Algorithm Engine:</span>
+              <strong style="color:var(--fc-text);">{{ prediction.model_name }}</strong>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Model Version:</span>
+              <span>{{ prediction.model_version }}</span>
+            </div>
+            <div class="d-flex justify-content-between mb-1">
+              <span class="text-muted">Evaluated By:</span>
+              <span>{{ prediction.predicted_by.username|default:"System" }}</span>
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted">Generated Date:</span>
+              <span>{{ prediction.created_at|date:"M d, Y H:i" }}</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Side-by-Side Comparison Table -->
+    <div class="col-12 col-lg-8">
+      <div class="fc-table-wrapper h-100">
+        <div class="fc-table-header">
+          <h2 class="fc-table-title">
+            <i class="bi bi-diagram-3-fill me-2 fc-text-primary" aria-hidden="true"></i>
+            Child &amp; Family Profile Matching
+          </h2>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-bordered align-middle" aria-label="Side by side profile match table">
+            <thead>
+              <tr style="background:var(--fc-bg-secondary);">
+                <th scope="col" style="width:25%;">Feature Factor</th>
+                <th scope="col" style="width:37.5%;">
+                  <i class="bi bi-person me-1 fc-text-primary" aria-hidden="true"></i>
+                  Child: {{ prediction.child.first_name }}
+                </th>
+                <th scope="col" style="width:37.5%;">
+                  <i class="bi bi-house-heart me-1 fc-text-accent" aria-hidden="true"></i>
+                  Family: {{ prediction.family.family_name }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td style="font-weight:600; font-size:0.8125rem; background:var(--fc-bg-secondary);">Location State</td>
+                <td>{{ prediction.child.state }}</td>
+                <td>{{ prediction.family.state }}</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; font-size:0.8125rem; background:var(--fc-bg-secondary);">Age / Experience</td>
+                <td>{{ prediction.child.age }} years old</td>
+                <td>{{ prediction.family.experience_years }} years active foster home</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; font-size:0.8125rem; background:var(--fc-bg-secondary);">Special Needs</td>
+                <td>
+                  {% if prediction.child.special_needs %}
+                    <span class="fc-badge-yes badge">Requires Special Care</span>
+                  {% else %}
+                    <span class="fc-badge-no badge">No Special Needs</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if prediction.family.accepts_special_needs %}
+                    <span class="fc-badge-yes badge">Accepts Special Needs</span>
+                  {% else %}
+                    <span class="fc-badge-no badge">No Special Needs Experience</span>
+                  {% endif %}
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; font-size:0.8125rem; background:var(--fc-bg-secondary);">Group / Capacity</td>
+                <td>
+                  Sibling group: {{ prediction.child.sibling_group_size }} child{% if prediction.child.sibling_group_size > 1 %}ren{% endif %}
+                </td>
+                <td>
+                  {{ prediction.family.available_slots }} free slots (Capacity: {{ prediction.family.capacity }})
+                </td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; font-size:0.8125rem; background:var(--fc-bg-secondary);">Environment</td>
+                <td>Time in care: {{ prediction.child.time_in_care_months }} months</td>
+                <td>Home setting: {{ prediction.family.get_home_type_display }}</td>
+              </tr>
+              <tr>
+                <td style="font-weight:600; font-size:0.8125rem; background:var(--fc-bg-secondary);">Behavioral Score</td>
+                <td>Index: {{ prediction.child.behavioral_notes_score|floatformat:2 }}</td>
+                <td>
+                  {% if prediction.family.accepts_special_needs %}
+                    Supported by specialized experience
+                  {% else %}
+                    Standard placement profile
+                  {% endif %}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-3 border-top" style="background:var(--fc-bg-secondary);">
+          <div class="d-flex align-items-start gap-2">
+            <i class="bi bi-shield-exclamation text-warning mt-1" aria-hidden="true"></i>
+            <p class="mb-0" style="font-size:0.75rem; color:var(--fc-text-muted);">
+              <strong>Decision-Support Disclaimer:</strong> Machine learning score predictions are generated from historical placement trends. They are designed to assist, not replace, professional casework assessment.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Explainable AI (SHAP) Risk Drivers Breakdown -->
+  <div class="row mt-4">
+    <div class="col-12">
+      <div class="fc-card">
+        <div class="fc-card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <span class="fw-bold"><i class="bi bi-cpu-fill text-primary me-2" aria-hidden="true"></i> Explainable AI (SHAP Feature Attribution)</span>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-2 rounded-pill">SHAP TreeExplainer Model Attribution</span>
+        </div>
+        <div class="fc-card-body">
+          
+          <div class="alert alert-light border shadow-sm mb-4">
+            <div class="d-flex align-items-center gap-2 mb-1">
+              <i class="bi bi-lightbulb-fill text-warning fs-5" aria-hidden="true"></i>
+              <strong style="color:var(--fc-text);">Casework Key Risk &amp; Compatibility Factors:</strong>
+            </div>
+            <p class="mb-0 text-secondary" style="font-size:0.9375rem; line-height:1.6;">
+              {{ prediction.summary_explanation_text }}
+            </p>
+          </div>
+
+          <div class="row g-4">
+            <!-- Risk Increasing Factors -->
+            <div class="col-12 col-md-6">
+              <div class="card h-100 border-danger-subtle bg-danger-subtle bg-opacity-10">
+                <div class="card-header bg-danger text-white py-2 fw-semibold">
+                  <i class="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i> Disruption Risk Factors (+%)
+                </div>
+                <div class="card-body">
+                  {% if prediction.top_risk_drivers %}
+                    {% for driver in prediction.top_risk_drivers %}
+                      <div class="mb-3 pb-2 border-bottom border-danger-subtle">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                          <span class="fw-bold text-danger" style="font-size:0.875rem;">{{ driver.label }}</span>
+                          <span class="badge bg-danger">+{{ driver.impact_pct }}% Risk</span>
+                        </div>
+                        <div class="progress mb-1" style="height:6px;">
+                          <div class="progress-bar bg-danger" role="progressbar" style="width: {{ driver.abs_impact }}%;" aria-valuenow="{{ driver.abs_impact }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted" style="font-size:0.75rem;">
+                          <span>Value: <strong>{{ driver.observed_value }}</strong></span>
+                          <span>{{ driver.description }}</span>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <p class="text-muted small mb-0">No significant disruption risk drivers identified for this placement.</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+            <!-- Stability Boosting Factors -->
+            <div class="col-12 col-md-6">
+              <div class="card h-100 border-success-subtle bg-success-subtle bg-opacity-10">
+                <div class="card-header bg-success text-white py-2 fw-semibold">
+                  <i class="bi bi-shield-check me-1" aria-hidden="true"></i> Compatibility &amp; Stability Boosters (-%)
+                </div>
+                <div class="card-body">
+                  {% if prediction.top_stability_drivers %}
+                    {% for driver in prediction.top_stability_drivers %}
+                      <div class="mb-3 pb-2 border-bottom border-success-subtle">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                          <span class="fw-bold text-success" style="font-size:0.875rem;">{{ driver.label }}</span>
+                          <span class="badge bg-success">{{ driver.impact_pct }}% Risk</span>
+                        </div>
+                        <div class="progress mb-1" style="height:6px;">
+                          <div class="progress-bar bg-success" role="progressbar" style="width: {{ driver.abs_impact }}%;" aria-valuenow="{{ driver.abs_impact }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <div class="d-flex justify-content-between text-muted" style="font-size:0.75rem;">
+                          <span>Value: <strong>{{ driver.observed_value }}</strong></span>
+                          <span>{{ driver.description }}</span>
+                        </div>
+                      </div>
+                    {% endfor %}
+                  {% else %}
+                    <p class="text-muted small mb-0">Placement features align with standard baseline balance.</p>
+                  {% endif %}
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

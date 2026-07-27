@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load role_tags %}
+
+{% block title %}Children Registry{% endblock %}
+{% block meta_description %}Browse and manage all children in the foster care system.{% endblock %}
+
+{% block content %}
+
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Children</li>
+      </ol>
+    </nav>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
+      <div>
+        <h1 class="mb-0">Children Registry</h1>
+        <p class="fc-breadcrumb mt-1">{{ paginator.count }} child record{{ paginator.count|pluralize }} in the system</p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'children:export_csv' %}?{{ query_params }}" class="btn btn-secondary btn-sm btn-icon" aria-label="Export current view as CSV">
+          <i class="bi bi-filetype-csv" aria-hidden="true"></i> Export CSV
+        </a>
+        {% if request.user|can_edit %}
+          <a href="{% url 'children:create' %}" class="btn btn-primary btn-sm btn-icon">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Child
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- SEARCH & FILTERS -->
+  <form method="get" aria-label="Filter children" class="mb-4">
+    <div class="fc-filter-bar">
+      <div class="row g-2 align-items-end">
+
+        <!-- Search -->
+        <div class="col-12 col-md-4">
+          <label for="child-search" class="form-label" style="font-size:0.8125rem; font-weight:600;">Search</label>
+          <div class="fc-search-bar">
+            <i class="fc-search-icon bi bi-search" aria-hidden="true"></i>
+            <input type="text" id="child-search" name="q" value="{{ request.GET.q }}"
+                   class="form-control" placeholder="Name or state…" aria-label="Search children">
+          </div>
+        </div>
+
+        <!-- State filter -->
+        <div class="col-12 col-md-2">
+          <label for="child-state" class="form-label" style="font-size:0.8125rem; font-weight:600;">State</label>
+          <select id="child-state" name="state" class="form-select" aria-label="Filter by state">
+            <option value="">All States</option>
+            {% for s in states %}
+              <option value="{{ s }}" {% if request.GET.state == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Gender filter -->
+        <div class="col-6 col-md-2">
+          <label for="child-gender" class="form-label" style="font-size:0.8125rem; font-weight:600;">Gender</label>
+          <select id="child-gender" name="gender" class="form-select" aria-label="Filter by gender">
+            <option value="">Any</option>
+            <option value="M" {% if request.GET.gender == 'M' %}selected{% endif %}>Male</option>
+            <option value="F" {% if request.GET.gender == 'F' %}selected{% endif %}>Female</option>
+            <option value="O" {% if request.GET.gender == 'O' %}selected{% endif %}>Other</option>
+          </select>
+        </div>
+
+        <!-- Placed filter -->
+        <div class="col-6 col-md-2">
+          <label for="child-placed" class="form-label" style="font-size:0.8125rem; font-weight:600;">Status</label>
+          <select id="child-placed" name="is_placed" class="form-select" aria-label="Filter by placement status">
+            <option value="">All</option>
+            <option value="true"  {% if request.GET.is_placed == 'true'  %}selected{% endif %}>Placed</option>
+            <option value="false" {% if request.GET.is_placed == 'false' %}selected{% endif %}>Not Placed</option>
+          </select>
+        </div>
+
+        <!-- Special needs -->
+        <div class="col-6 col-md-2">
+          <label for="child-sn" class="form-label" style="font-size:0.8125rem; font-weight:600;">Special Needs</label>
+          <select id="child-sn" name="special_needs" class="form-select" aria-label="Filter by special needs">
+            <option value="">Any</option>
+            <option value="true"  {% if request.GET.special_needs == 'true'  %}selected{% endif %}>Yes</option>
+            <option value="false" {% if request.GET.special_needs == 'false' %}selected{% endif %}>No</option>
+          </select>
+        </div>
+
+        <!-- Sort -->
+        <div class="col-6 col-md-2">
+          <label for="child-sort" class="form-label" style="font-size:0.8125rem; font-weight:600;">Sort By</label>
+          <select id="child-sort" name="sort" class="form-select" aria-label="Sort results">
+            <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Newest First</option>
+            <option value="created_at"  {% if request.GET.sort == 'created_at'  %}selected{% endif %}>Oldest First</option>
+            <option value="age"         {% if request.GET.sort == 'age'         %}selected{% endif %}>Age ↑</option>
+            <option value="-age"        {% if request.GET.sort == '-age'        %}selected{% endif %}>Age ↓</option>
+            <option value="time_in_care_months" {% if request.GET.sort == 'time_in_care_months' %}selected{% endif %}>Time in Care ↑</option>
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="col-12 d-flex gap-2 mt-1">
+          <button type="submit" class="btn btn-primary btn-sm btn-icon">
+            <i class="bi bi-funnel-fill" aria-hidden="true"></i> Apply Filters
+          </button>
+          <a href="{% url 'children:index' %}" class="btn btn-secondary btn-sm">Clear</a>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+  <!-- TABLE -->
+  <div class="fc-table-wrapper">
+
+    <div class="fc-table-header">
+      <h2 class="fc-table-title">
+        <i class="bi bi-people-fill me-2 fc-text-primary" aria-hidden="true"></i>
+        Children
+      </h2>
+      <span style="font-size:0.8125rem; color:var(--fc-text-muted);">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover table-striped" aria-label="Children registry">
+        <thead>
+          <tr>
+            <th scope="col">Name</th>
+            <th scope="col">Age</th>
+            <th scope="col">Gender</th>
+            <th scope="col">State</th>
+            <th scope="col">Special Needs</th>
+            <th scope="col">Sibling Group</th>
+            <th scope="col">Time in Care</th>
+            <th scope="col">Status</th>
+            <th scope="col" aria-label="Actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for child in children %}
+            <tr>
+              <td>
+                <div style="font-weight:600;">{{ child.first_name }}</div>
+                <div style="font-size:0.75rem; color:var(--fc-text-muted);">#{{ child.pk }}</div>
+              </td>
+              <td>{{ child.age }} yrs</td>
+              <td>{{ child.get_gender_display }}</td>
+              <td>{{ child.state }}</td>
+              <td>
+                {% if child.special_needs %}
+                  <span class="fc-badge-yes badge">Yes</span>
+                {% else %}
+                  <span class="fc-badge-no badge">No</span>
+                {% endif %}
+              </td>
+              <td>{{ child.sibling_group_size }}</td>
+              <td>{{ child.time_in_care_months }} mo</td>
+              <td>
+                {% if child.is_placed %}
+                  <span class="fc-badge-placed badge">Placed</span>
+                {% else %}
+                  <span class="fc-badge-unplaced badge">Not Placed</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="{% url 'children:detail' child.pk %}"
+                     class="btn btn-sm btn-outline-primary" aria-label="View {{ child.first_name }}">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                  </a>
+                  {% if request.user|can_edit %}
+                    <a href="{% url 'children:update' child.pk %}"
+                       class="btn btn-sm btn-secondary" aria-label="Edit {{ child.first_name }}">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </a>
+                  {% endif %}
+                  <a href="{% url 'predictions:create' %}?child={{ child.pk }}"
+                     class="btn btn-sm btn-outline-primary" aria-label="Predict placement for {{ child.first_name }}"
+                     style="border-color:var(--fc-accent);color:var(--fc-accent);">
+                    <i class="bi bi-cpu" aria-hidden="true"></i>
+                  </a>
+                </div>
+
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="9">
+                <div class="fc-empty-state">
+                  <div class="fc-empty-state-icon" aria-hidden="true"><i class="bi bi-people"></i></div>
+                  <h3 class="fc-empty-state-title">No children found</h3>
+                  <p class="fc-empty-state-desc">
+                    {% if request.GET.q %}
+                      No records match your search. Try different filters.
+                    {% else %}
+                      No child records have been added yet.
+                    {% endif %}
+                  </p>
+                  {% if request.user|can_edit %}
+                    <a href="{% url 'children:create' %}" class="btn btn-primary btn-icon">
+                      <i class="bi bi-plus-lg" aria-hidden="true"></i> Add First Child
+                    </a>
+                  {% endif %}
+
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+      <div class="fc-table-footer">
+        <p style="font-size:0.8125rem; color:var(--fc-text-muted); margin:0;">
+          Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ paginator.count }} records
+        </p>
+        <nav aria-label="Children pagination">
+          <ul class="pagination">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?{{ query_params }}&page={{ page_obj.previous_page_number }}" aria-label="Previous page">
+                  <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left" aria-hidden="true"></i></span></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item"><a class="page-link" href="?{{ query_params }}&page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?{{ query_params }}&page={{ page_obj.next_page_number }}" aria-label="Next page">
+                  <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right" aria-hidden="true"></i></span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    {% endif %}
+
+  </div><!-- /.fc-table-wrapper -->
+
+</div><!-- /.container -->
+{% endblock %}

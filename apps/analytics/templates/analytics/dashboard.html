@@ -1,0 +1,280 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Executive Dashboard{% endblock %}
+{% block meta_description %}Real-time metrics, active cases, recent placements, and analytics summaries.{% endblock %}
+
+{% block content %}
+
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+      </ol>
+    </nav>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
+      <div>
+        <h1 class="mb-0">Placement System Dashboard</h1>
+        <p class="fc-breadcrumb mt-1">System overview &amp; real-time operational indicators</p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'analytics:export_dashboard_pdf' %}" class="btn btn-secondary btn-sm btn-icon" aria-label="Export dashboard summary as PDF">
+          <i class="bi bi-file-earmark-pdf-fill text-danger" aria-hidden="true"></i> Summary PDF
+        </a>
+        <a href="{% url 'predictions:create' %}" class="btn btn-primary btn-sm btn-icon">
+          <i class="bi bi-cpu" aria-hidden="true"></i> Run Prediction
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- Primary Stat Cards (4 Top Cards) -->
+  <div class="row g-3 mb-4">
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="fc-stat-card primary">
+        <div class="fc-stat-card-icon" aria-hidden="true">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div class="fc-stat-card-body">
+          <div class="fc-stat-card-value">{{ total_children }}</div>
+          <div class="fc-stat-card-label">Total Children in Care</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="fc-stat-card accent">
+        <div class="fc-stat-card-icon" aria-hidden="true">
+          <i class="bi bi-house-check-fill"></i>
+        </div>
+        <div class="fc-stat-card-body">
+          <div class="fc-stat-card-value">{{ available_families }}</div>
+          <div class="fc-stat-card-label">Available Foster Families</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="fc-stat-card success">
+        <div class="fc-stat-card-icon" aria-hidden="true">
+          <i class="bi bi-shield-check"></i>
+        </div>
+        <div class="fc-stat-card-body">
+          <div class="fc-stat-card-value">{{ active_placements }}</div>
+          <div class="fc-stat-card-label">Active Stable Placements</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-sm-6 col-lg-3">
+      <div class="fc-stat-card danger">
+        <div class="fc-stat-card-icon" aria-hidden="true">
+          <i class="bi bi-exclamation-octagon-fill"></i>
+        </div>
+        <div class="fc-stat-card-body">
+          <div class="fc-stat-card-value">{{ disrupted_placements }}</div>
+          <div class="fc-stat-card-label">Disrupted Cases</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secondary Metrics Row -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="fc-card p-3 d-flex align-items-center gap-3">
+        <div class="fc-stat-card-icon info" style="width:38px;height:38px;font-size:1rem;" aria-hidden="true">
+          <i class="bi bi-check-circle"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:1.125rem; line-height:1.1;">{{ placed_children }}</div>
+          <div style="font-size:0.75rem; color:var(--fc-text-muted);">Placed Children</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fc-card p-3 d-flex align-items-center gap-3">
+        <div class="fc-stat-card-icon accent" style="width:38px;height:38px;font-size:1rem;" aria-hidden="true">
+          <i class="bi bi-house"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:1.125rem; line-height:1.1;">{{ total_families }}</div>
+          <div style="font-size:0.75rem; color:var(--fc-text-muted);">Total Families</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fc-card p-3 d-flex align-items-center gap-3">
+        <div class="fc-stat-card-icon success" style="width:38px;height:38px;font-size:1rem;" aria-hidden="true">
+          <i class="bi bi-cpu"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:1.125rem; line-height:1.1;">{{ total_predictions }}</div>
+          <div style="font-size:0.75rem; color:var(--fc-text-muted);">ML Predictions</div>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="fc-card p-3 d-flex align-items-center gap-3">
+        <div class="fc-stat-card-icon warning" style="width:38px;height:38px;font-size:1rem;" aria-hidden="true">
+          <i class="bi bi-file-earmark-text"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:1.125rem; line-height:1.1;">{{ total_reports }}</div>
+          <div style="font-size:0.75rem; color:var(--fc-text-muted);">Stored Reports</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Highlight Visualizations Gallery -->
+  {% if highlight_charts %}
+    <div class="mb-5">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="fc-section-title mb-0" style="font-size:1.375rem;">
+          <i class="bi bi-bar-chart-line-fill me-2 fc-text-primary" aria-hidden="true"></i>
+          Key System Visualizations
+        </h2>
+        <a href="{% url 'analytics:visualizations' %}" class="btn btn-sm btn-outline-primary">
+          View All Visualizations <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
+        </a>
+      </div>
+      <div class="row g-3">
+        {% for chart in highlight_charts %}
+          <div class="col-12 col-md-6 col-lg-3">
+            <div class="fc-chart-card">
+              <div class="fc-chart-card-header text-truncate">
+                {{ chart|cut:".png" }}
+              </div>
+              <img src="/media/analytics/charts/{{ chart }}" alt="Chart image {{ chart }}" loading="lazy">
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Tables Section -->
+  <div class="row g-4">
+
+    <!-- Recent Placements Table -->
+    <div class="col-12 col-lg-6">
+      <div class="fc-table-wrapper">
+        <div class="fc-table-header">
+          <h2 class="fc-table-title">
+            <i class="bi bi-clock-history me-2 fc-text-primary" aria-hidden="true"></i>
+            Recent Placement Decisions
+          </h2>
+          <a href="{% url 'placements:index' %}" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover" aria-label="Recent placement decisions">
+            <thead>
+              <tr>
+                <th>Child</th>
+                <th>Family</th>
+                <th>Status</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for placement in recent_placements %}
+                <tr>
+                  <td>
+                    <a href="{% url 'children:detail' placement.child.pk %}" style="font-weight:600;">
+                      {{ placement.child.first_name }}
+                    </a>
+                  </td>
+                  <td>
+                    <a href="{% url 'families:detail' placement.family.pk %}">
+                      {{ placement.family.family_name }}
+                    </a>
+                  </td>
+                  <td>
+                    <span class="fc-badge-{{ placement.status }} badge">
+                      {{ placement.get_status_display }}
+                    </span>
+                  </td>
+                  <td style="font-size:0.8125rem; color:var(--fc-text-muted);">
+                    {{ placement.created_at|date:"M d, Y" }}
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted" style="font-size:0.875rem;">
+                    No recent placement activities.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Predictions Table -->
+    <div class="col-12 col-lg-6">
+      <div class="fc-table-wrapper">
+        <div class="fc-table-header">
+          <h2 class="fc-table-title">
+            <i class="bi bi-cpu me-2 fc-text-primary" aria-hidden="true"></i>
+            Latest ML Inferences
+          </h2>
+          <a href="{% url 'predictions:index' %}" class="btn btn-sm btn-outline-primary">View All</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover" aria-label="Latest ML inferences">
+            <thead>
+              <tr>
+                <th>Child</th>
+                <th>Family</th>
+                <th>Score</th>
+                <th>Model</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pred in recent_predictions %}
+                <tr>
+                  <td>
+                    <a href="{% url 'children:detail' pred.child.pk %}" style="font-weight:600;">
+                      {{ pred.child.first_name }}
+                    </a>
+                  </td>
+                  <td>
+                    <a href="{% url 'families:detail' pred.family.pk %}">
+                      {{ pred.family.family_name }}
+                    </a>
+                  </td>
+                  <td>
+                    {% if pred.compatibility_score >= 0.7 %}
+                      <span class="fc-score-badge high">{{ pred.compatibility_score|floatformat:2 }}</span>
+                    {% elif pred.compatibility_score >= 0.4 %}
+                      <span class="fc-score-badge medium">{{ pred.compatibility_score|floatformat:2 }}</span>
+                    {% else %}
+                      <span class="fc-score-badge low">{{ pred.compatibility_score|floatformat:2 }}</span>
+                    {% endif %}
+                  </td>
+                  <td style="font-size:0.8125rem; color:var(--fc-text-muted);">{{ pred.model_name }}</td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center py-4 text-muted" style="font-size:0.875rem;">
+                    No predictions run yet.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

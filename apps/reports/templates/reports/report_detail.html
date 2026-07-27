@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ report.title|default:"Report Detail" }}{% endblock %}
+
+{% block content %}
+
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'reports:index' %}">Reports</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Report #{{ report.pk }}</li>
+      </ol>
+    </nav>
+    <h1 class="mt-1">{{ report.title|default:"System Analytical Report" }}</h1>
+    <p class="fc-breadcrumb mt-1">Generated {{ report.created_at|date:"F d, Y" }} · {{ report.report_type|default:"Audit Report" }}</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+  <div class="fc-card">
+    <div class="fc-card-header d-flex justify-content-between align-items-center">
+      <span>Report Overview</span>
+      {% if report.file %}
+        <a href="{{ report.file.url }}" class="btn btn-sm btn-primary btn-icon">
+          <i class="bi bi-download" aria-hidden="true"></i> Download File
+        </a>
+      {% endif %}
+    </div>
+    <div class="fc-card-body">
+      {% if report.description %}
+        <p style="font-size:0.9375rem; color:var(--fc-text-muted); line-height:1.7;">
+          {{ report.description }}
+        </p>
+      {% else %}
+        <p class="text-muted">No description provided for this report document.</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

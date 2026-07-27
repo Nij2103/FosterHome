@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Visualizations Gallery{% endblock %}
+{% block meta_description %}Comprehensive gallery of data visualisations, EDA plots, and ML model evaluation charts.{% endblock %}
+
+{% block content %}
+
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'analytics:dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Visualizations</li>
+      </ol>
+    </nav>
+    <h1 class="mt-1">Analytics Visualizations Gallery</h1>
+    <p class="fc-breadcrumb mt-1">Exploratory data analysis plots, feature correlations, and model metrics</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  {% for category, charts in categories.items %}
+    {% if charts %}
+      <div class="mb-5">
+        <div class="fc-section-divider text-start mb-4 ms-0" style="width:100%;">
+          <span style="font-size:1.125rem; font-weight:700; color:var(--fc-text);">{{ category }}</span>
+        </div>
+
+        <div class="row g-4">
+          {% for chart_filename in charts %}
+            <div class="col-12 col-md-6 col-lg-4">
+              <div class="fc-chart-card h-100">
+                <div class="fc-chart-card-header text-truncate d-flex align-items-center justify-content-between">
+                  <span>{{ chart_filename|cut:".png" }}</span>
+                  <a href="/media/analytics/charts/{{ chart_filename }}" target="_blank" rel="noopener" class="text-muted" aria-label="View full size image">
+                    <i class="bi bi-arrows-angle-expand" aria-hidden="true"></i>
+                  </a>
+                </div>
+                <img src="/media/analytics/charts/{{ chart_filename }}" alt="{{ chart_filename }}" loading="lazy">
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    {% endif %}
+  {% empty %}
+    <div class="fc-empty-state my-5">
+      <div class="fc-empty-state-icon" aria-hidden="true"><i class="bi bi-bar-chart-line"></i></div>
+      <h2 class="fc-empty-state-title">No Generated Charts Found</h2>
+      <p class="fc-empty-state-desc">
+        Run EDA scripts or model training commands to generate chart artifacts in the media directory.
+      </p>
+    </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

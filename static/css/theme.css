@@ -1,0 +1,33 @@
+:root {
+  --fc-sky-blue: #eaf4fb;
+  --fc-light-green: #eaf7ee;
+  --fc-pastel-orange: #fdf1e7;
+  --fc-accent: #3a7ca5;
+}
+
+body {
+  background-color: #fbfbf9;
+}
+
+.card {
+  border-radius: 14px;
+  border: 1px solid #eceae4;
+}
+
+.stat-card {
+  border-radius: 14px;
+  padding: 1.25rem;
+}
+
+.stat-card.bg-sky { background-color: var(--fc-sky-blue); }
+.stat-card.bg-green { background-color: var(--fc-light-green); }
+.stat-card.bg-orange { background-color: var(--fc-pastel-orange); }
+
+.btn-primary {
+  background-color: var(--fc-accent);
+  border-color: var(--fc-accent);
+}
+
+.navbar-brand {
+  color: var(--fc-accent) !important;
+}

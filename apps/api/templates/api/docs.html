@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}REST API Documentation{% endblock %}
+{% block content %}
+<h1 class="h4 mb-2">REST API Documentation</h1>
+<p class="text-secondary small">
+  All endpoints require an authenticated session (log in via <a href="{% url 'accounts:login' %}">/accounts/login/</a>
+  then visit any URL below in your browser for DRF's interactive browsable API).
+  Base path: <code>/api/v1/</code>.
+</p>
+
+{% for ep in endpoints %}
+<div class="card p-3 mb-3">
+  <h2 class="h6">{{ ep.resource }}</h2>
+  <p class="mb-1"><code>{{ ep.base_url }}</code></p>
+  <p class="small mb-1"><strong>Methods:</strong> {{ ep.methods }}</p>
+  <p class="small mb-1"><strong>Filters/params:</strong> <code>{{ ep.filters }}</code></p>
+  <p class="small text-secondary mb-0">{{ ep.notes }}</p>
+</div>
+{% endfor %}
+
+<div class="card p-3 bg-sky">
+  <h2 class="h6">Example: requesting a prediction</h2>
+  <pre class="small mb-0" style="white-space: pre-wrap;">POST /api/v1/predictions/request_prediction/
+Content-Type: application/json
+
+{"child": 12, "family": 7}
+
+&rarr; 201 Created
+{"id": 45, "child": 12, "child_name": "Avery", "family": 7,
+ "family_name": "Turner Family", "compatibility_score": 0.76,
+ "model_name": "XGBoost", "model_version": "v1", ...}</pre>
+</div>
+{% endblock %}

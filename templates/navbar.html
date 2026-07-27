@@ -1,0 +1,201 @@
+{% load static %}
+<!-- NAVBAR — Sticky, responsive, role-aware navigation Included by base.html -->
+<nav class="fc-navbar navbar navbar-expand-lg" role="navigation" aria-label="Main navigation">
+  <div class="container">
+
+    <!-- Brand / Logo -->
+    <a class="navbar-brand fc-navbar-brand" href="{% url 'core:landing' %}" aria-label="Foster Care Placement Predictor - Home">
+      <div class="fc-logo-icon" aria-hidden="true">
+        <i class="bi bi-heart-pulse-fill"></i>
+      </div>
+      <div class="fc-logo-text">
+        <span style="line-height:1.1; display:block; font-size:0.95rem;">Foster Care</span>
+        <span>Placement Predictor</span>
+      </div>
+    </a>
+
+    <!-- Mobile toggler -->
+    <button class="navbar-toggler" type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#fcNavMain"
+            aria-controls="fcNavMain"
+            aria-expanded="false"
+            aria-label="Toggle navigation menu">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Nav links -->
+    <div class="collapse navbar-collapse" id="fcNavMain">
+
+      <!-- Primary links -->
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-lg-1">
+
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'landing' %}active{% endif %}"
+             href="{% url 'core:landing' %}"
+             {% if request.resolver_match.url_name == 'landing' %}aria-current="page"{% endif %}>
+            <i class="bi bi-house me-1 d-lg-none" aria-hidden="true"></i>Home
+          </a>
+        </li>
+
+        {% if user.is_authenticated %}
+
+          <li class="nav-item">
+            <a class="nav-link {% if 'analytics' in request.resolver_match.namespace %}active{% endif %}"
+               href="{% url 'analytics:dashboard' %}"
+               {% if 'analytics' in request.resolver_match.namespace %}aria-current="page"{% endif %}>
+              <i class="bi bi-speedometer2 me-1 d-lg-none" aria-hidden="true"></i>Dashboard
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if 'children' in request.resolver_match.namespace %}active{% endif %}"
+               href="{% url 'children:index' %}"
+               {% if 'children' in request.resolver_match.namespace %}aria-current="page"{% endif %}>
+              <i class="bi bi-people me-1 d-lg-none" aria-hidden="true"></i>Children
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if 'families' in request.resolver_match.namespace %}active{% endif %}"
+               href="{% url 'families:index' %}"
+               {% if 'families' in request.resolver_match.namespace %}aria-current="page"{% endif %}>
+              <i class="bi bi-house-heart me-1 d-lg-none" aria-hidden="true"></i>Families
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if 'placements' in request.resolver_match.namespace %}active{% endif %}"
+               href="{% url 'placements:index' %}"
+               {% if 'placements' in request.resolver_match.namespace %}aria-current="page"{% endif %}>
+              <i class="bi bi-shuffle me-1 d-lg-none" aria-hidden="true"></i>Placements
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link {% if 'predictions' in request.resolver_match.namespace %}active{% endif %}"
+               href="{% url 'predictions:index' %}"
+               {% if 'predictions' in request.resolver_match.namespace %}aria-current="page"{% endif %}>
+              <i class="bi bi-cpu me-1 d-lg-none" aria-hidden="true"></i>Predictions
+            </a>
+          </li>
+
+          <!-- Analytics dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle {% if 'analytics' in request.resolver_match.namespace %}active{% endif %}"
+               href="{% url 'analytics:visualizations' %}" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false" id="analyticsDropdown">
+              <i class="bi bi-bar-chart-line me-1 d-lg-none" aria-hidden="true"></i>Analytics
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="analyticsDropdown">
+              <li>
+                <a class="dropdown-item" href="{% url 'analytics:visualizations' %}">
+                  <i class="bi bi-graph-up me-2 text-muted" aria-hidden="true"></i>Visualizations
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{% url 'analytics:model_comparison' %}">
+                  <i class="bi bi-clipboard-data me-2 text-muted" aria-hidden="true"></i>Model Comparison
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{% url 'reports:index' %}">
+                  <i class="bi bi-file-earmark-text me-2 text-muted" aria-hidden="true"></i>Reports
+                </a>
+              </li>
+            </ul>
+          </li>
+
+        {% endif %}
+
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}"
+             href="{% url 'core:about' %}"
+             {% if request.resolver_match.url_name == 'about' %}aria-current="page"{% endif %}>
+            <i class="bi bi-info-circle me-1 d-lg-none" aria-hidden="true"></i>About
+          </a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link {% if request.resolver_match.url_name == 'contact' %}active{% endif %}"
+             href="{% url 'core:contact' %}"
+             {% if request.resolver_match.url_name == 'contact' %}aria-current="page"{% endif %}>
+            <i class="bi bi-envelope me-1 d-lg-none" aria-hidden="true"></i>Contact
+          </a>
+        </li>
+
+      </ul>
+
+      <!-- Right side: auth -->
+      <ul class="navbar-nav align-items-lg-center gap-2">
+
+        {% if user.is_authenticated %}
+
+          <!-- Authenticated user dropdown -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-2"
+               href="#" role="button"
+               data-bs-toggle="dropdown"
+               aria-expanded="false"
+               id="userDropdown">
+              <span class="fc-logo-icon"
+                    style="width:30px;height:30px;font-size:0.875rem;background-color:var(--fc-primary-light);color:var(--fc-primary);"
+                    aria-hidden="true">
+                <i class="bi bi-person-fill"></i>
+              </span>
+              <span>{{ user.get_short_name|default:user.username }}</span>
+              {% if user.profile %}
+                <span class="fc-role-badge">{{ user.profile.get_role_display }}</span>
+              {% endif %}
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              <li class="px-3 py-2 border-bottom" style="border-color:var(--fc-border)!important;">
+                <div style="font-size:0.8125rem; font-weight:600; color:var(--fc-text);">{{ user.get_full_name|default:user.username }}</div>
+                <div style="font-size:0.75rem; color:var(--fc-text-muted);">{{ user.email }}</div>
+              </li>
+              <li class="mt-1">
+                <a class="dropdown-item" href="{% url 'accounts:profile' %}">
+                  <i class="bi bi-person me-2 text-muted" aria-hidden="true"></i>My Profile
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="{% url 'accounts:settings' %}">
+                  <i class="bi bi-gear me-2 text-muted" aria-hidden="true"></i>Settings
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form method="post" action="{% url 'accounts:logout' %}" class="m-0">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger">
+                    <i class="bi bi-box-arrow-right me-2" aria-hidden="true"></i>Sign Out
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </li>
+
+        {% else %}
+
+          <li class="nav-item">
+            <a class="nav-link btn-nav-login px-3"
+               href="{% url 'accounts:login' %}"
+               role="button">
+              Sign In
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="btn btn-nav-register"
+               href="{% url 'accounts:register' %}"
+               role="button">
+              Register
+            </a>
+          </li>
+
+        {% endif %}
+
+      </ul>
+
+    </div><!-- /.navbar-collapse -->
+  </div><!-- /.container -->
+</nav>

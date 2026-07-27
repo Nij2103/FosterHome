@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Family Record{% endblock %}
+
+{% block content %}
+<div class="container pb-5">
+  <div class="fc-delete-card">
+    <div class="fc-delete-icon" aria-hidden="true">
+      <i class="bi bi-exclamation-triangle-fill"></i>
+    </div>
+    <h1 style="font-size:1.5rem; font-weight:700; margin-bottom:0.5rem;">Delete Foster Family Record</h1>
+    <p style="color:var(--fc-text-muted); font-size:0.9375rem; margin-bottom:1.5rem;">
+      Are you sure you want to delete the record for
+      <strong style="color:var(--fc-text);">{{ object.family_name }}</strong> (ID #{{ object.pk }})?
+    </p>
+    <div class="alert alert-warning text-start mb-4" role="alert">
+      <div class="d-flex gap-2">
+        <i class="bi bi-info-circle-fill flex-shrink-0 mt-1" aria-hidden="true"></i>
+        <div style="font-size:0.8125rem;">
+          <strong>Warning:</strong> Removing this family record will affect historical predictions and active placement logs.
+          Consider deactivating the family profile instead of deleting it permanently.
+        </div>
+      </div>
+    </div>
+    <form method="post" aria-label="Confirm deletion of family record">
+      {% csrf_token %}
+      <div class="d-flex gap-3 justify-content-center">
+        <button type="submit" class="btn btn-danger btn-lg btn-icon">
+          <i class="bi bi-trash-fill" aria-hidden="true"></i> Delete Record
+        </button>
+        <a href="{% url 'families:detail' object.pk %}" class="btn btn-secondary btn-lg">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load role_tags %}
+
+{% block title %}Foster Families Registry{% endblock %}
+{% block meta_description %}Browse and manage all registered foster families in the placement system.{% endblock %}
+
+{% block content %}
+
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Families</li>
+      </ol>
+    </nav>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
+      <div>
+        <h1 class="mb-0">Foster Families Registry</h1>
+        <p class="fc-breadcrumb mt-1">{{ paginator.count }} approved foster family record{{ paginator.count|pluralize }} in system</p>
+      </div>
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'families:export_csv' %}?{{ query_params }}" class="btn btn-secondary btn-sm btn-icon" aria-label="Export current view as CSV">
+          <i class="bi bi-filetype-csv" aria-hidden="true"></i> Export CSV
+        </a>
+        {% if request.user|can_edit %}
+          <a href="{% url 'families:create' %}" class="btn btn-primary btn-sm btn-icon">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Family
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- Search & Filter -->
+  <form method="get" aria-label="Filter families" class="mb-4">
+    <div class="fc-filter-bar">
+      <div class="row g-2 align-items-end">
+
+        <!-- Search -->
+        <div class="col-12 col-md-3">
+          <label for="family-search" class="form-label" style="font-size:0.8125rem; font-weight:600;">Search</label>
+          <div class="fc-search-bar">
+            <i class="fc-search-icon bi bi-search" aria-hidden="true"></i>
+            <input type="text" id="family-search" name="q" value="{{ request.GET.q }}"
+                   class="form-control" placeholder="Family name or state…" aria-label="Search families">
+          </div>
+        </div>
+
+        <!-- State -->
+        <div class="col-12 col-md-2">
+          <label for="family-state" class="form-label" style="font-size:0.8125rem; font-weight:600;">State</label>
+          <select id="family-state" name="state" class="form-select" aria-label="Filter by state">
+            <option value="">All States</option>
+            {% for s in states %}
+              <option value="{{ s }}" {% if request.GET.state == s %}selected{% endif %}>{{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Home Type -->
+        <div class="col-6 col-md-2">
+          <label for="family-hometype" class="form-label" style="font-size:0.8125rem; font-weight:600;">Home Type</label>
+          <select id="family-hometype" name="home_type" class="form-select" aria-label="Filter by home type">
+            <option value="">All Types</option>
+            <option value="urban" {% if request.GET.home_type == 'urban' %}selected{% endif %}>Urban</option>
+            <option value="suburban" {% if request.GET.home_type == 'suburban' %}selected{% endif %}>Suburban</option>
+            <option value="rural" {% if request.GET.home_type == 'rural' %}selected{% endif %}>Rural</option>
+          </select>
+        </div>
+
+        <!-- Active Status -->
+        <div class="col-6 col-md-2">
+          <label for="family-active" class="form-label" style="font-size:0.8125rem; font-weight:600;">Status</label>
+          <select id="family-active" name="is_active" class="form-select" aria-label="Filter by active status">
+            <option value="">All</option>
+            <option value="true" {% if request.GET.is_active == 'true' %}selected{% endif %}>Active Only</option>
+            <option value="false" {% if request.GET.is_active == 'false' %}selected{% endif %}>Inactive Only</option>
+          </select>
+        </div>
+
+        <!-- Special Needs -->
+        <div class="col-6 col-md-1">
+          <label for="family-sn" class="form-label" style="font-size:0.8125rem; font-weight:600;">Special</label>
+          <select id="family-sn" name="accepts_special_needs" class="form-select" aria-label="Filter by special needs acceptance">
+            <option value="">Any</option>
+            <option value="true" {% if request.GET.accepts_special_needs == 'true' %}selected{% endif %}>Yes</option>
+            <option value="false" {% if request.GET.accepts_special_needs == 'false' %}selected{% endif %}>No</option>
+          </select>
+        </div>
+
+        <!-- Sort -->
+        <div class="col-6 col-md-2">
+          <label for="family-sort" class="form-label" style="font-size:0.8125rem; font-weight:600;">Sort By</label>
+          <select id="family-sort" name="sort" class="form-select" aria-label="Sort results">
+            <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Newest First</option>
+            <option value="created_at" {% if request.GET.sort == 'created_at' %}selected{% endif %}>Oldest First</option>
+            <option value="-experience_years" {% if request.GET.sort == '-experience_years' %}selected{% endif %}>Experience ↓</option>
+            <option value="-capacity" {% if request.GET.sort == '-capacity' %}selected{% endif %}>Capacity ↓</option>
+          </select>
+        </div>
+
+        <!-- Buttons -->
+        <div class="col-12 d-flex gap-2 mt-1">
+          <button type="submit" class="btn btn-primary btn-sm btn-icon">
+            <i class="bi bi-funnel-fill" aria-hidden="true"></i> Apply Filters
+          </button>
+          <a href="{% url 'families:index' %}" class="btn btn-secondary btn-sm">Clear</a>
+        </div>
+
+      </div>
+    </div>
+  </form>
+
+  <!-- Table -->
+  <div class="fc-table-wrapper">
+
+    <div class="fc-table-header">
+      <h2 class="fc-table-title">
+        <i class="bi bi-house-heart-fill me-2 fc-text-primary" aria-hidden="true"></i>
+        Foster Families
+      </h2>
+      <span style="font-size:0.8125rem; color:var(--fc-text-muted);">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+      </span>
+    </div>
+
+    <div class="table-responsive">
+      <table class="table table-hover table-striped" aria-label="Foster families registry">
+        <thead>
+          <tr>
+            <th scope="col">Family Name</th>
+            <th scope="col">State</th>
+            <th scope="col">Home Type</th>
+            <th scope="col">Experience</th>
+            <th scope="col">Capacity / Occupancy</th>
+            <th scope="col">Special Needs</th>
+            <th scope="col">Siblings</th>
+            <th scope="col">Status</th>
+            <th scope="col" aria-label="Actions"></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for family in families %}
+            <tr>
+              <td>
+                <div style="font-weight:600;">{{ family.family_name }}</div>
+                <div style="font-size:0.75rem; color:var(--fc-text-muted);">#{{ family.pk }}</div>
+              </td>
+              <td>{{ family.state }}</td>
+              <td><span class="text-capitalize">{{ family.get_home_type_display }}</span></td>
+              <td>{{ family.experience_years }} yrs</td>
+              <td>
+                <div style="font-size:0.8125rem; font-weight:600; margin-bottom:2px;">
+                  {{ family.current_occupancy }} / {{ family.capacity }}
+                  <span style="font-size:0.75rem; font-weight:400; color:var(--fc-text-muted);">
+                    ({{ family.available_slots }} slot{{ family.available_slots|pluralize }} free)
+                  </span>
+                </div>
+                <div class="progress" style="height:6px;" aria-label="Occupancy {{ family.current_occupancy }} of {{ family.capacity }}">
+                  <div class="progress-bar {% if family.current_occupancy >= family.capacity %}bg-danger{% elif family.current_occupancy > 0 %}bg-warning{% endif %}"
+                       role="progressbar"
+                       style="width:{% if family.capacity > 0 %}{% widthratio family.current_occupancy family.capacity 100 %}{% else %}0{% endif %}%"></div>
+                </div>
+              </td>
+              <td>
+                {% if family.accepts_special_needs %}
+                  <span class="fc-badge-yes badge">Accepts</span>
+                {% else %}
+                  <span class="fc-badge-no badge">No</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if family.accepts_sibling_groups %}
+                  <span class="fc-badge-yes badge">Accepts</span>
+                {% else %}
+                  <span class="fc-badge-no badge">No</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if family.is_active %}
+                  <span class="fc-badge-active badge">Active</span>
+                {% else %}
+                  <span class="badge bg-secondary">Inactive</span>
+                {% endif %}
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <a href="{% url 'families:detail' family.pk %}"
+                     class="btn btn-sm btn-outline-primary" aria-label="View {{ family.family_name }}">
+                    <i class="bi bi-eye" aria-hidden="true"></i>
+                  </a>
+                  {% if request.user|can_edit %}
+                    <a href="{% url 'families:update' family.pk %}"
+                       class="btn btn-sm btn-secondary" aria-label="Edit {{ family.family_name }}">
+                      <i class="bi bi-pencil" aria-hidden="true"></i>
+                    </a>
+                  {% endif %}
+                  <a href="{% url 'predictions:create' %}?family={{ family.pk }}"
+                     class="btn btn-sm btn-outline-primary" aria-label="Predict placement for {{ family.family_name }}"
+                     style="border-color:var(--fc-accent);color:var(--fc-accent);">
+                    <i class="bi bi-cpu" aria-hidden="true"></i>
+                  </a>
+                </div>
+
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="9">
+                <div class="fc-empty-state">
+                  <div class="fc-empty-state-icon" aria-hidden="true"><i class="bi bi-house-heart"></i></div>
+                  <h3 class="fc-empty-state-title">No foster families found</h3>
+                  <p class="fc-empty-state-desc">No family records match your current filters.</p>
+                  {% if request.user|can_edit %}
+                    <a href="{% url 'families:create' %}" class="btn btn-primary btn-icon">
+                      <i class="bi bi-plus-lg" aria-hidden="true"></i> Add First Family
+                    </a>
+                  {% endif %}
+
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+      <div class="fc-table-footer">
+        <p style="font-size:0.8125rem; color:var(--fc-text-muted); margin:0;">
+          Showing {{ page_obj.start_index }}–{{ page_obj.end_index }} of {{ paginator.count }} records
+        </p>
+        <nav aria-label="Families pagination">
+          <ul class="pagination">
+            {% if page_obj.has_previous %}
+              <li class="page-item">
+                <a class="page-link" href="?{{ query_params }}&page={{ page_obj.previous_page_number }}" aria-label="Previous page">
+                  <i class="bi bi-chevron-left" aria-hidden="true"></i>
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left" aria-hidden="true"></i></span></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+              {% if page_obj.number == num %}
+                <li class="page-item active" aria-current="page"><span class="page-link">{{ num }}</span></li>
+              {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                <li class="page-item"><a class="page-link" href="?{{ query_params }}&page={{ num }}">{{ num }}</a></li>
+              {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+              <li class="page-item">
+                <a class="page-link" href="?{{ query_params }}&page={{ page_obj.next_page_number }}" aria-label="Next page">
+                  <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </a>
+              </li>
+            {% else %}
+              <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right" aria-hidden="true"></i></span></li>
+            {% endif %}
+          </ul>
+        </nav>
+      </div>
+    {% endif %}
+
+  </div><!-- /.fc-table-wrapper -->
+
+</div><!-- /.container -->
+{% endblock %}

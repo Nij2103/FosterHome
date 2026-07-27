@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load role_tags %}
+
+{% block title %}{{ fosterfamily.family_name }} — Family Detail{% endblock %}
+
+{% block content %}
+
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'families:index' %}">Families</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ fosterfamily.family_name }}</li>
+      </ol>
+    </nav>
+    <h1 class="mt-1">Family Profile</h1>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- Header Card -->
+  <div class="fc-detail-header mb-4">
+    <div class="d-flex align-items-start gap-4 flex-wrap">
+      <div class="fc-detail-avatar" style="background:var(--fc-accent-light); color:var(--fc-accent);" aria-hidden="true">
+        <i class="bi bi-house-heart-fill"></i>
+      </div>
+      <div class="flex-grow-1">
+        <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
+          <h2 class="fc-detail-title mb-0">{{ fosterfamily.family_name }}</h2>
+          {% if fosterfamily.is_active %}
+            <span class="fc-badge-active badge">Active</span>
+          {% else %}
+            <span class="badge bg-secondary">Inactive</span>
+          {% endif %}
+          <span class="badge bg-light text-dark border">{{ fosterfamily.get_home_type_display }}</span>
+        </div>
+        <p class="fc-detail-meta mb-1">
+          <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ fosterfamily.state }}
+          &nbsp;·&nbsp;
+          <i class="bi bi-clock-history me-1" aria-hidden="true"></i>{{ fosterfamily.experience_years }} Years Experience
+          &nbsp;·&nbsp;
+          ID #{{ fosterfamily.pk }}
+        </p>
+        <p class="fc-detail-meta mb-0" style="font-size:0.8125rem; color:var(--fc-text-muted);">
+          Registered {{ fosterfamily.created_at|date:"M d, Y" }} &nbsp;·&nbsp; Last updated {{ fosterfamily.updated_at|date:"M d, Y" }}
+        </p>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex gap-2 flex-wrap">
+        <a href="{% url 'predictions:create' %}?family={{ fosterfamily.pk }}"
+           class="btn btn-primary btn-sm btn-icon">
+          <i class="bi bi-cpu" aria-hidden="true"></i> Run Prediction
+        </a>
+        {% if request.user|can_edit %}
+          <a href="{% url 'families:update' fosterfamily.pk %}"
+             class="btn btn-outline-primary btn-sm btn-icon">
+            <i class="bi bi-pencil-square" aria-hidden="true"></i> Edit
+          </a>
+          <a href="{% url 'families:delete' fosterfamily.pk %}"
+             class="btn btn-danger btn-sm btn-icon">
+            <i class="bi bi-trash" aria-hidden="true"></i> Delete
+          </a>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Info Grid -->
+  <div class="fc-card mb-4">
+    <div class="fc-card-header">Family Overview</div>
+    <div class="fc-card-body">
+      <div class="fc-info-grid">
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Total Capacity</div>
+          <div class="fc-info-item-value">{{ fosterfamily.capacity }} child{% if fosterfamily.capacity != 1 %}ren{% endif %}</div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Current Occupancy</div>
+          <div class="fc-info-item-value">
+            {{ fosterfamily.current_occupancy }} child{% if fosterfamily.current_occupancy != 1 %}ren{% endif %}
+            <div class="progress mt-1" style="height:6px;" aria-label="Occupancy {{ fosterfamily.current_occupancy }} of {{ fosterfamily.capacity }}">
+              <div class="progress-bar {% if fosterfamily.current_occupancy >= fosterfamily.capacity %}bg-danger{% elif fosterfamily.current_occupancy > 0 %}bg-warning{% endif %}"
+                   role="progressbar"
+                   style="width:{% if fosterfamily.capacity > 0 %}{% widthratio fosterfamily.current_occupancy fosterfamily.capacity 100 %}{% else %}0{% endif %}%"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Available Slots</div>
+          <div class="fc-info-item-value">
+            <span class="{% if fosterfamily.available_slots > 0 %}fc-text-primary{% else %}fc-text-danger{% endif %}" style="font-size:1.125rem; font-weight:700;">
+              {{ fosterfamily.available_slots }} free
+            </span>
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Experience</div>
+          <div class="fc-info-item-value">{{ fosterfamily.experience_years }} years</div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Home Setting</div>
+          <div class="fc-info-item-value">{{ fosterfamily.get_home_type_display }}</div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">State</div>
+          <div class="fc-info-item-value">{{ fosterfamily.state }}</div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Accepts Special Needs</div>
+          <div class="fc-info-item-value">
+            {% if fosterfamily.accepts_special_needs %}
+              <span class="fc-badge-yes badge">Yes</span>
+            {% else %}
+              <span class="fc-badge-no badge">No</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Accepts Sibling Groups</div>
+          <div class="fc-info-item-value">
+            {% if fosterfamily.accepts_sibling_groups %}
+              <span class="fc-badge-yes badge">Yes</span>
+            {% else %}
+              <span class="fc-badge-no badge">No</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Active Status</div>
+          <div class="fc-info-item-value">
+            {% if fosterfamily.is_active %}
+              <span class="fc-badge-active badge">Active for Placements</span>
+            {% else %}
+              <span class="badge bg-secondary">Inactive</span>
+            {% endif %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-4">
+
+    <!-- Placement History -->
+    <div class="col-12 col-lg-6">
+      <div class="fc-table-wrapper">
+        <div class="fc-table-header">
+          <h2 class="fc-table-title">
+            <i class="bi bi-shuffle me-2 fc-text-primary" aria-hidden="true"></i>
+            Placements at this Home
+          </h2>
+          {% if request.user|can_edit %}
+            <a href="{% url 'placements:create' %}?family={{ fosterfamily.pk }}" class="btn btn-sm btn-primary btn-icon">
+              <i class="bi bi-plus-lg" aria-hidden="true"></i> Add
+            </a>
+          {% endif %}
+
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover" aria-label="Placements at family home">
+            <thead>
+              <tr>
+                <th>Child</th>
+                <th>Status</th>
+                <th>Start Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for placement in fosterfamily.placements.all %}
+                <tr>
+                  <td style="font-weight:600; font-size:0.875rem;">{{ placement.child.first_name }}</td>
+                  <td>
+                    <span class="fc-badge-{{ placement.status }} badge">
+                      {{ placement.get_status_display }}
+                    </span>
+                  </td>
+                  <td style="font-size:0.8125rem;">{{ placement.start_date|date:"M d, Y"|default:"—" }}</td>
+                  <td>
+                    <a href="{% url 'placements:detail' placement.pk %}" class="btn btn-sm btn-outline-primary" aria-label="View placement">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center py-4 fc-text-muted" style="font-size:0.875rem;">
+                    <i class="bi bi-inbox me-1" aria-hidden="true"></i>No placement history recorded.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Predictions History -->
+    <div class="col-12 col-lg-6">
+      <div class="fc-table-wrapper">
+        <div class="fc-table-header">
+          <h2 class="fc-table-title">
+            <i class="bi bi-cpu me-2 fc-text-primary" aria-hidden="true"></i>
+            Predictions Evaluated
+          </h2>
+          <a href="{% url 'predictions:create' %}?family={{ fosterfamily.pk }}" class="btn btn-sm btn-primary btn-icon">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Run New
+          </a>
+        </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover" aria-label="Predictions evaluated for family">
+            <thead>
+              <tr>
+                <th>Child</th>
+                <th>Score</th>
+                <th>Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for pred in fosterfamily.predictions.all %}
+                <tr>
+                  <td style="font-weight:600; font-size:0.875rem;">{{ pred.child.first_name }}</td>
+                  <td>
+                    {% if pred.compatibility_score >= 0.7 %}
+                      <span class="fc-score-badge high">{{ pred.compatibility_score|floatformat:2 }}</span>
+                    {% elif pred.compatibility_score >= 0.4 %}
+                      <span class="fc-score-badge medium">{{ pred.compatibility_score|floatformat:2 }}</span>
+                    {% else %}
+                      <span class="fc-score-badge low">{{ pred.compatibility_score|floatformat:2 }}</span>
+                    {% endif %}
+                  </td>
+                  <td style="font-size:0.8125rem; color:var(--fc-text-muted);">{{ pred.created_at|date:"M d, Y" }}</td>
+                  <td>
+                    <a href="{% url 'predictions:detail' pred.pk %}" class="btn btn-sm btn-outline-primary" aria-label="View prediction">
+                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    </a>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="4" class="text-center py-4 fc-text-muted" style="font-size:0.875rem;">
+                    <i class="bi bi-inbox me-1" aria-hidden="true"></i>No predictions evaluated yet.
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+{% endblock %}

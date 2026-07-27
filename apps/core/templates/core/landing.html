@@ -1,0 +1,457 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+{% block meta_description %}Foster Care Placement Predictor — AI-powered placement matching and case management for child welfare professionals.{% endblock %}
+
+{% block content %}
+
+<!-- HERO SECTION -->
+<section class="fc-hero" aria-labelledby="hero-heading">
+  <div class="container">
+    <div class="row align-items-center g-5">
+
+      <!-- Left: Text -->
+      <div class="col-12 col-lg-6">
+
+        <div class="fc-hero-eyebrow" aria-label="System badge">
+          <i class="bi bi-shield-check" aria-hidden="true"></i>
+          Trusted Child Welfare Platform
+        </div>
+
+        <h1 id="hero-heading" class="fc-hero-title">
+          Building Better<br>
+          <span class="fc-highlight">Foster Care</span> Placements
+        </h1>
+
+        <p class="fc-hero-desc">
+          An intelligent case management system that uses machine learning to
+          match children with the most compatible foster families — helping
+          case workers make confident, data-informed decisions that improve
+          placement outcomes.
+        </p>
+
+        <div class="fc-hero-actions">
+          {% if user.is_authenticated %}
+            <a href="{% url 'analytics:dashboard' %}" class="btn btn-primary btn-lg btn-icon">
+              <i class="bi bi-speedometer2" aria-hidden="true"></i>
+              Go to Dashboard
+            </a>
+            <a href="{% url 'predictions:create' %}" class="btn btn-outline-primary btn-lg btn-icon">
+              <i class="bi bi-cpu" aria-hidden="true"></i>
+              Run a Prediction
+            </a>
+          {% else %}
+            <a href="{% url 'accounts:register' %}" class="btn btn-primary btn-lg btn-icon">
+              <i class="bi bi-person-plus" aria-hidden="true"></i>
+              Get Started
+            </a>
+            <a href="{% url 'core:about' %}" class="btn btn-outline-primary btn-lg btn-icon">
+              <i class="bi bi-info-circle" aria-hidden="true"></i>
+              Learn More
+            </a>
+          {% endif %}
+        </div>
+
+        <!-- Trust indicators -->
+        <div class="d-flex align-items-center gap-3 mt-4 flex-wrap">
+          <div class="d-flex align-items-center gap-2" style="font-size:0.8125rem; color:var(--fc-text-muted);">
+            <i class="bi bi-check-circle-fill fc-text-primary" aria-hidden="true"></i>
+            <span>Synthetic data only — privacy first</span>
+          </div>
+          <div class="d-flex align-items-center gap-2" style="font-size:0.8125rem; color:var(--fc-text-muted);">
+            <i class="bi bi-check-circle-fill fc-text-primary" aria-hidden="true"></i>
+            <span>Role-based access control</span>
+          </div>
+          <div class="d-flex align-items-center gap-2" style="font-size:0.8125rem; color:var(--fc-text-muted);">
+            <i class="bi bi-check-circle-fill fc-text-primary" aria-hidden="true"></i>
+            <span>Audit-ready records</span>
+          </div>
+        </div>
+
+      </div><!-- /col-lg-6 -->
+
+      <!-- Right: Visual -->
+      <div class="col-12 col-lg-6 fc-hero-visual" aria-hidden="true">
+        <div class="fc-hero-illustration p-4">
+          <!-- Dashboard preview mockup -->
+          <div style="background:var(--fc-bg-secondary); border-radius:var(--fc-radius-sm); padding:0.75rem; margin-bottom:0.75rem;">
+            <div style="height:8px; width:40%; background:var(--fc-border); border-radius:99px; margin-bottom:0.5rem;"></div>
+            <div class="row g-2">
+              <div class="col-3">
+                <div style="background:var(--fc-white); border:1px solid var(--fc-border); border-radius:var(--fc-radius-sm); padding:0.75rem; text-align:center;">
+                  <div style="font-size:1.25rem; font-weight:800; color:var(--fc-primary);">248</div>
+                  <div style="font-size:0.65rem; color:var(--fc-text-muted); margin-top:2px;">Children</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div style="background:var(--fc-white); border:1px solid var(--fc-border); border-radius:var(--fc-radius-sm); padding:0.75rem; text-align:center;">
+                  <div style="font-size:1.25rem; font-weight:800; color:var(--fc-accent);">134</div>
+                  <div style="font-size:0.65rem; color:var(--fc-text-muted); margin-top:2px;">Families</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div style="background:var(--fc-white); border:1px solid var(--fc-border); border-radius:var(--fc-radius-sm); padding:0.75rem; text-align:center;">
+                  <div style="font-size:1.25rem; font-weight:800; color:var(--fc-success);">89</div>
+                  <div style="font-size:0.65rem; color:var(--fc-text-muted); margin-top:2px;">Placed</div>
+                </div>
+              </div>
+              <div class="col-3">
+                <div style="background:var(--fc-white); border:1px solid var(--fc-border); border-radius:var(--fc-radius-sm); padding:0.75rem; text-align:center;">
+                  <div style="font-size:1.25rem; font-weight:800; color:var(--fc-warning);">12</div>
+                  <div style="font-size:0.65rem; color:var(--fc-text-muted); margin-top:2px;">Pending</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!-- Prediction result mockup -->
+          <div style="background:var(--fc-white); border:1px solid var(--fc-border); border-radius:var(--fc-radius-sm); padding:1rem; margin-bottom:0.75rem;">
+            <div style="font-size:0.7rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--fc-text-muted); margin-bottom:0.5rem;">Latest Prediction</div>
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div style="font-size:0.8125rem; font-weight:600;">Emma R. × Johnson Family</div>
+                <div style="font-size:0.75rem; color:var(--fc-text-muted);">RandomForestClassifier · v1</div>
+              </div>
+              <div style="width:48px; height:48px; border-radius:50%; background:#E8F5E9; border:3px solid var(--fc-primary); display:flex; align-items:center; justify-content:center; font-size:0.875rem; font-weight:800; color:var(--fc-primary);">0.87</div>
+            </div>
+          </div>
+          <!-- Mini activity feed -->
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            {% for item in "123"|make_list %}
+              <div style="display:flex; align-items:center; gap:0.75rem; padding:0.5rem 0.625rem; background:var(--fc-white); border:1px solid var(--fc-border); border-radius:var(--fc-radius-sm);">
+                <div style="width:28px; height:28px; border-radius:50%; background:var(--fc-primary-light); display:flex; align-items:center; justify-content:center; color:var(--fc-primary); font-size:0.75rem; flex-shrink:0;">
+                  <i class="bi bi-person-check"></i>
+                </div>
+                <div style="flex:1; height:8px; background:var(--fc-border); border-radius:99px;"></div>
+                <div style="width:40px; height:8px; background:var(--fc-border); border-radius:99px;"></div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div><!-- /col-lg-6 -->
+
+    </div><!-- /.row -->
+  </div><!-- /.container -->
+</section>
+
+<!-- STATS STRIP -->
+<section class="fc-stats-strip" aria-label="System statistics">
+  <div class="container">
+    <div class="row g-0 justify-content-center text-center">
+
+      <div class="col-6 col-md-3 fc-stat-item">
+        <span class="fc-stat-number">{{ total_children|default:"500+" }}</span>
+        <span class="fc-stat-label">Children Registered</span>
+      </div>
+
+      <div class="col-6 col-md-3 fc-stat-item">
+        <span class="fc-stat-number">{{ total_families|default:"300+" }}</span>
+        <span class="fc-stat-label">Foster Families</span>
+      </div>
+
+      <div class="col-6 col-md-3 fc-stat-item">
+        <span class="fc-stat-number">{{ successful_placements|default:"95%" }}</span>
+        <span class="fc-stat-label">Placement Success Rate</span>
+      </div>
+
+      <div class="col-6 col-md-3 fc-stat-item">
+        <span class="fc-stat-number">{{ total_predictions|default:"1,000+" }}</span>
+        <span class="fc-stat-label">ML Predictions Made</span>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section class="fc-section" aria-labelledby="features-heading">
+  <div class="container">
+
+    <div class="text-center mb-5">
+      <span class="fc-section-label">What We Offer</span>
+      <h2 id="features-heading" class="fc-section-title">A Complete Placement Management Platform</h2>
+      <p class="fc-section-subtitle mx-auto">
+        Every tool a case worker needs — from child intake to family matching,
+        ML-driven predictions, and comprehensive reporting.
+      </p>
+    </div>
+
+    <div class="row g-4">
+
+      <!-- Feature 1 -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="fc-feature-card" aria-labelledby="feat1-title">
+          <div class="fc-feature-icon">
+            <i class="bi bi-cpu" aria-hidden="true"></i>
+          </div>
+          <h3 id="feat1-title" class="fc-feature-title">AI Placement Matching</h3>
+          <p class="fc-feature-desc">
+            Our machine learning models analyze child characteristics and family
+            profiles to generate a compatibility score — giving case workers an
+            objective, data-informed recommendation alongside their professional
+            judgement.
+          </p>
+        </article>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="fc-feature-card" aria-labelledby="feat2-title">
+          <div class="fc-feature-icon">
+            <i class="bi bi-people-fill" aria-hidden="true"></i>
+          </div>
+          <h3 id="feat2-title" class="fc-feature-title">Child & Family Registry</h3>
+          <p class="fc-feature-desc">
+            A centralized registry of all children in the care system and approved
+            foster families. Full CRUD management with search, filtering, and
+            role-based access so only authorized staff can modify records.
+          </p>
+        </article>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="fc-feature-card" aria-labelledby="feat3-title">
+          <div class="fc-feature-icon accent">
+            <i class="bi bi-bar-chart-line-fill" aria-hidden="true"></i>
+          </div>
+          <h3 id="feat3-title" class="fc-feature-title">Analytics & Reporting</h3>
+          <p class="fc-feature-desc">
+            A real-time dashboard, 20+ interactive charts covering age distribution,
+            placement outcomes, model performance, and state-wise trends — plus
+            exportable PDF and CSV reports for stakeholders.
+          </p>
+        </article>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="fc-feature-card" aria-labelledby="feat4-title">
+          <div class="fc-feature-icon">
+            <i class="bi bi-shuffle" aria-hidden="true"></i>
+          </div>
+          <h3 id="feat4-title" class="fc-feature-title">Placement Tracking</h3>
+          <p class="fc-feature-desc">
+            Record and track every placement — from "proposed" through "active",
+            "completed", and if necessary, "disrupted" — with start/end dates,
+            disruption reasons, and a full audit trail for compliance.
+          </p>
+        </article>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="fc-feature-card" aria-labelledby="feat5-title">
+          <div class="fc-feature-icon accent">
+            <i class="bi bi-shield-lock-fill" aria-hidden="true"></i>
+          </div>
+          <h3 id="feat5-title" class="fc-feature-title">Role-Based Access Control</h3>
+          <p class="fc-feature-desc">
+            Three distinct roles — Administrator, Case Worker, and Viewer — ensure
+            that sensitive records are only modified by authorized personnel, while
+            read-only stakeholders can still access dashboards and reports.
+          </p>
+        </article>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="col-12 col-md-6 col-lg-4">
+        <article class="fc-feature-card" aria-labelledby="feat6-title">
+          <div class="fc-feature-icon">
+            <i class="bi bi-cloud-download-fill" aria-hidden="true"></i>
+          </div>
+          <h3 id="feat6-title" class="fc-feature-title">Export & Interoperability</h3>
+          <p class="fc-feature-desc">
+            Export any dataset or report as CSV, Excel, or PDF at any time.
+            A versioned REST API allows external systems to query placement
+            data and trigger prediction requests programmatically.
+          </p>
+        </article>
+      </div>
+
+    </div><!-- /.row -->
+
+  </div><!-- /.container -->
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="fc-section-sm" style="background-color:var(--fc-bg-secondary); border-top:1px solid var(--fc-border); border-bottom:1px solid var(--fc-border);" aria-labelledby="how-heading">
+  <div class="container">
+
+    <div class="text-center mb-5">
+      <span class="fc-section-label">The Process</span>
+      <h2 id="how-heading" class="fc-section-title">How the System Works</h2>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+      <div class="col-12 col-md-4">
+        <div class="fc-step">
+          <div class="fc-step-number" aria-hidden="true">1</div>
+          <div>
+            <h3 class="fc-step-title">Register Children & Families</h3>
+            <p class="fc-step-desc">
+              Case workers add child profiles (age, special needs, sibling group,
+              behavioral index) and foster family profiles (capacity, experience,
+              home type, accepted needs) into the secure registry.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="fc-step">
+          <div class="fc-step-number" aria-hidden="true">2</div>
+          <div>
+            <h3 class="fc-step-title">Request an ML Prediction</h3>
+            <p class="fc-step-desc">
+              Select a child and a candidate family. The system runs the trained
+              machine learning model and returns a 0–1 compatibility score with
+              a full breakdown, exportable as a PDF report.
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 col-md-4">
+        <div class="fc-step">
+          <div class="fc-step-number" aria-hidden="true">3</div>
+          <div>
+            <h3 class="fc-step-title">Confirm the Placement</h3>
+            <p class="fc-step-desc">
+              After reviewing the prediction alongside other case factors, the
+              case worker creates a formal placement record that is tracked
+              through its full lifecycle and included in compliance reports.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ANNOUNCEMENTS -->
+<section class="fc-section" aria-labelledby="announcements-heading">
+  <div class="container">
+    <div class="row g-5">
+
+      <div class="col-12 col-lg-7">
+        <span class="fc-section-label">Latest Updates</span>
+        <h2 id="announcements-heading" class="fc-section-title mb-4">System Announcements</h2>
+
+        <article class="fc-announcement-card" aria-label="System update announcement">
+          <p class="fc-announcement-date">July 2026</p>
+          <h3 class="fc-announcement-title">ML Model v2 Now Available</h3>
+          <p class="fc-announcement-desc">
+            The Gradient Boosting classifier (v2) has been deployed, achieving 91% accuracy
+            on the validation set. All new prediction requests will use this model by default.
+          </p>
+        </article>
+
+        <article class="fc-announcement-card accent" aria-label="Training announcement">
+          <p class="fc-announcement-date">June 2026</p>
+          <h3 class="fc-announcement-title">Case Worker Training Session — July 15</h3>
+          <p class="fc-announcement-desc">
+            A virtual training on using the Predictions module and reading compatibility
+            scores in context will be held on July 15. All registered case workers
+            will receive a calendar invite.
+          </p>
+        </article>
+
+        <article class="fc-announcement-card warning" aria-label="Maintenance announcement">
+          <p class="fc-announcement-date">June 2026</p>
+          <h3 class="fc-announcement-title">Scheduled Maintenance — July 10, 2–4 AM EST</h3>
+          <p class="fc-announcement-desc">
+            The system will undergo scheduled maintenance. All data will be preserved.
+            Export any time-sensitive reports before the window.
+          </p>
+        </article>
+      </div>
+
+      <!-- Quick access sidebar -->
+      <div class="col-12 col-lg-5">
+        <span class="fc-section-label">Quick Access</span>
+        <h2 class="fc-section-title mb-4" style="font-size:1.25rem;">Common Tasks</h2>
+
+        <div class="d-flex flex-column gap-3">
+          {% if user.is_authenticated %}
+            {% load role_tags %}
+            {% if request.user|can_edit %}
+              <a href="{% url 'children:create' %}" class="fc-card fc-card-body d-flex align-items-center gap-3 text-decoration-none text-dark">
+                <div class="fc-feature-icon mb-0" style="width:40px;height:40px;flex-shrink:0;"><i class="bi bi-person-plus-fill"></i></div>
+                <div>
+                  <div style="font-weight:700;font-size:0.9375rem;">Add a Child Record</div>
+                  <div style="font-size:0.8125rem;color:var(--fc-text-muted);">Register a new child into the system</div>
+                </div>
+                <i class="bi bi-arrow-right ms-auto text-muted" aria-hidden="true"></i>
+              </a>
+              <a href="{% url 'families:create' %}" class="fc-card fc-card-body d-flex align-items-center gap-3 text-decoration-none text-dark">
+                <div class="fc-feature-icon mb-0" style="width:40px;height:40px;flex-shrink:0;"><i class="bi bi-house-add-fill"></i></div>
+                <div>
+                  <div style="font-weight:700;font-size:0.9375rem;">Register a Foster Family</div>
+                  <div style="font-size:0.8125rem;color:var(--fc-text-muted);">Add an approved foster family</div>
+                </div>
+                <i class="bi bi-arrow-right ms-auto text-muted" aria-hidden="true"></i>
+              </a>
+            {% endif %}
+
+            <a href="{% url 'predictions:create' %}" class="fc-card fc-card-body d-flex align-items-center gap-3 text-decoration-none text-dark">
+              <div class="fc-feature-icon mb-0" style="width:40px;height:40px;flex-shrink:0;"><i class="bi bi-cpu"></i></div>
+              <div>
+                <div style="font-weight:700;font-size:0.9375rem;">Run a Placement Prediction</div>
+                <div style="font-size:0.8125rem;color:var(--fc-text-muted);">Get an ML compatibility score</div>
+              </div>
+              <i class="bi bi-arrow-right ms-auto text-muted" aria-hidden="true"></i>
+            </a>
+            <a href="{% url 'analytics:dashboard' %}" class="fc-card fc-card-body d-flex align-items-center gap-3 text-decoration-none text-dark">
+              <div class="fc-feature-icon mb-0" style="width:40px;height:40px;flex-shrink:0; background:var(--fc-accent-light); color:var(--fc-accent);"><i class="bi bi-speedometer2"></i></div>
+              <div>
+                <div style="font-weight:700;font-size:0.9375rem;">View Dashboard</div>
+                <div style="font-size:0.8125rem;color:var(--fc-text-muted);">Statistics and recent activity</div>
+              </div>
+              <i class="bi bi-arrow-right ms-auto text-muted" aria-hidden="true"></i>
+            </a>
+          {% else %}
+            <a href="{% url 'accounts:login' %}" class="fc-card fc-card-body d-flex align-items-center gap-3 text-decoration-none text-dark">
+              <div class="fc-feature-icon mb-0" style="width:40px;height:40px;flex-shrink:0;"><i class="bi bi-box-arrow-in-right"></i></div>
+              <div>
+                <div style="font-weight:700;font-size:0.9375rem;">Sign In to Access the System</div>
+                <div style="font-size:0.8125rem;color:var(--fc-text-muted);">Dashboard, children, families, and predictions</div>
+              </div>
+              <i class="bi bi-arrow-right ms-auto text-muted" aria-hidden="true"></i>
+            </a>
+            <a href="{% url 'accounts:register' %}" class="fc-card fc-card-body d-flex align-items-center gap-3 text-decoration-none text-dark">
+              <div class="fc-feature-icon mb-0" style="width:40px;height:40px;flex-shrink:0;"><i class="bi bi-person-plus-fill"></i></div>
+              <div>
+                <div style="font-weight:700;font-size:0.9375rem;">Create an Account</div>
+                <div style="font-size:0.8125rem;color:var(--fc-text-muted);">Register as a case worker or administrator</div>
+              </div>
+              <i class="bi bi-arrow-right ms-auto text-muted" aria-hidden="true"></i>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+
+    </div><!-- /.row -->
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+{% if not user.is_authenticated %}
+<section class="fc-cta-banner" aria-labelledby="cta-heading">
+  <div class="container">
+    <h2 id="cta-heading">Ready to Improve Placement Outcomes?</h2>
+    <p>Join the child welfare professionals already using data-driven matching to give children the best start.</p>
+    <div class="d-flex gap-3 justify-content-center flex-wrap">
+      <a href="{% url 'accounts:register' %}" class="btn btn-outline-light btn-lg btn-icon">
+        <i class="bi bi-person-plus" aria-hidden="true"></i>
+        Create Free Account
+      </a>
+      <a href="{% url 'core:contact' %}" class="btn btn-outline-light btn-lg btn-icon">
+        <i class="bi bi-envelope" aria-hidden="true"></i>
+        Contact Us
+      </a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,104 @@
+{% load static %}
+<!-- FOOTER — Included by base.html White background, thin top border, links + contact + social -->
+<footer class="fc-footer" role="contentinfo" aria-label="Site footer">
+  <div class="container">
+
+    <div class="row g-5">
+
+      <!-- Brand & Description -->
+      <div class="col-12 col-md-4 col-lg-4">
+        <div class="fc-footer-brand">
+          <div class="fc-logo-icon" aria-hidden="true">
+            <i class="bi bi-heart-pulse-fill"></i>
+          </div>
+          <span>Foster Care Predictor</span>
+        </div>
+        <p class="fc-footer-desc">
+          An AI-powered case management and placement recommendation platform
+          supporting child welfare professionals in making better, data-informed
+          placement decisions.
+        </p>
+        <!-- Social icons -->
+        <div class="fc-social-links mt-3">
+          <a href="https://github.com/Nij2103" target="_blank" rel="noopener" class="fc-social-link" aria-label="GitHub: Nij2103" title="GitHub: Nij2103">
+            <i class="bi bi-github" aria-hidden="true"></i>
+          </a>
+          <a href="https://www.linkedin.com/in/nij-patel" target="_blank" rel="noopener" class="fc-social-link" aria-label="LinkedIn: Nij patel" title="LinkedIn: Nij patel">
+            <i class="bi bi-linkedin" aria-hidden="true"></i>
+          </a>
+          <a href="mailto:nijspare2103@gmail.com" class="fc-social-link" aria-label="Email: nijspare2103@gmail.com" title="Email: nijspare2103@gmail.com">
+            <i class="bi bi-envelope-fill" aria-hidden="true"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-6 col-md-2 col-lg-2">
+        <h2 class="fc-footer-heading">Quick Links</h2>
+        <ul class="fc-footer-links" role="list">
+          <li><a href="{% url 'core:landing' %}">Home</a></li>
+          <li><a href="{% url 'core:about' %}">About</a></li>
+          <li><a href="{% url 'core:contact' %}">Contact</a></li>
+          <li><a href="{% url 'accounts:login' %}">Sign In</a></li>
+          <li><a href="{% url 'accounts:register' %}">Register</a></li>
+        </ul>
+      </div>
+
+      <!-- System Links -->
+      <div class="col-6 col-md-2 col-lg-2">
+        <h2 class="fc-footer-heading">System</h2>
+        <ul class="fc-footer-links" role="list">
+          <li><a href="{% url 'analytics:dashboard' %}">Dashboard</a></li>
+          <li><a href="{% url 'children:index' %}">Children</a></li>
+          <li><a href="{% url 'families:index' %}">Families</a></li>
+          <li><a href="{% url 'placements:index' %}">Placements</a></li>
+          <li><a href="{% url 'predictions:index' %}">Predictions</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact Info -->
+      <div class="col-12 col-md-4 col-lg-4">
+        <h2 class="fc-footer-heading">Contact</h2>
+
+        <div class="fc-footer-contact-item">
+          <i class="bi bi-geo-alt-fill fc-footer-icon" aria-hidden="true"></i>
+          <div>
+            <strong style="font-size:0.8125rem; color:var(--fc-text);">Foster Care Center</strong><br>
+            <span>Near Devpura patiya Deesa Highway<br>Palanpur, Gujarat 385001</span>
+          </div>
+        </div>
+
+        <div class="fc-footer-contact-item">
+          <i class="bi bi-telephone-fill fc-footer-icon" aria-hidden="true"></i>
+          <a href="tel:+919227010270" style="color:inherit;">+91 92270 10270</a>
+        </div>
+
+        <div class="fc-footer-contact-item">
+          <i class="bi bi-envelope-fill fc-footer-icon" aria-hidden="true"></i>
+          <a href="mailto:nijspare2103@gmail.com" style="color:inherit;">nijspare2103@gmail.com</a>
+        </div>
+
+        <div class="fc-footer-contact-item">
+          <i class="bi bi-clock-fill fc-footer-icon" aria-hidden="true"></i>
+          <span>Mon – Fri &nbsp;9:00 AM – 6:00 PM IST</span>
+        </div>
+      </div>
+
+    </div><!-- /.row -->
+
+    <!-- Bottom bar -->
+    <div class="fc-footer-bottom">
+      <p class="fc-footer-copyright mb-0">
+        &copy; {% now "Y" %} Foster Care Placement Predictor. All rights reserved.
+        &nbsp;|&nbsp; Built with <i class="bi bi-heart-fill" style="color:var(--fc-danger);font-size:0.7rem;" aria-hidden="true"></i>
+        for child welfare professionals.
+      </p>
+      <div class="d-flex gap-3">
+        <a href="#" style="font-size:0.75rem; color:var(--fc-text-muted);">Privacy Policy</a>
+        <a href="#" style="font-size:0.75rem; color:var(--fc-text-muted);">Terms of Use</a>
+        <a href="#" style="font-size:0.75rem; color:var(--fc-text-muted);">Accessibility</a>
+      </div>
+    </div>
+
+  </div><!-- /.container -->
+</footer>

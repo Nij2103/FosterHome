@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}ML Model Comparison & Report{% endblock %}
+{% block meta_description %}Detailed machine learning model benchmarking report and evaluation metrics.{% endblock %}
+
+{% block content %}
+
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'analytics:dashboard' %}">Dashboard</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Model Comparison</li>
+      </ol>
+    </nav>
+    <h1 class="mt-1">ML Model Comparison &amp; Evaluation Report</h1>
+    <p class="fc-breadcrumb mt-1">Benchmarking classification &amp; regression algorithms for placement prediction</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- Metadata Card -->
+  {% if metadata %}
+    <div class="fc-card mb-4" style="border-left:4px solid var(--fc-primary);">
+      <div class="fc-card-header bg-white border-0 pt-3 pb-0">
+        <span class="fc-section-label mb-1">Active Champion Model</span>
+        <h2 style="font-size:1.25rem; font-weight:700; margin:0;">{{ metadata.model_name }}</h2>
+      </div>
+      <div class="fc-card-body">
+        <div class="row g-3">
+          <div class="col-6 col-md-3">
+            <div style="font-size:0.75rem; color:var(--fc-text-muted); text-transform:uppercase; font-weight:700;">Validation Accuracy</div>
+            <div style="font-size:1.5rem; font-weight:800; color:var(--fc-primary);">{% if metadata.metrics.accuracy %}{{ metadata.metrics.accuracy|floatformat:4 }}{% else %}N/A{% endif %}</div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div style="font-size:0.75rem; color:var(--fc-text-muted); text-transform:uppercase; font-weight:700;">F1 Score</div>
+            <div style="font-size:1.5rem; font-weight:800; color:var(--fc-accent);">{% if metadata.metrics.f1 %}{{ metadata.metrics.f1|floatformat:4 }}{% else %}N/A{% endif %}</div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div style="font-size:0.75rem; color:var(--fc-text-muted); text-transform:uppercase; font-weight:700;">ROC-AUC Score</div>
+            <div style="font-size:1.5rem; font-weight:800; color:var(--fc-success);">{% if metadata.metrics.roc_auc %}{{ metadata.metrics.roc_auc|floatformat:4 }}{% else %}N/A{% endif %}</div>
+          </div>
+          <div class="col-6 col-md-3">
+            <div style="font-size:0.75rem; color:var(--fc-text-muted); text-transform:uppercase; font-weight:700;">Training Samples</div>
+            <div style="font-size:1.125rem; font-weight:600; color:var(--fc-text); margin-top:4px;">{{ metadata.trained_on_n_samples|default:"N/A" }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Model Benchmark Leaderboard Table -->
+  <div class="fc-card">
+    <div class="fc-card-header d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <span><i class="bi bi-trophy-fill me-2 fc-text-primary" aria-hidden="true"></i>Model Evaluation Leaderboard</span>
+      <span class="badge bg-light text-dark border">5 Classification Algorithms Benchmarked</span>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0" aria-label="Model evaluation leaderboard">
+        <thead class="table-light">
+          <tr>
+            <th scope="col" style="font-size:0.8125rem;">Algorithm</th>
+            <th scope="col" style="font-size:0.8125rem;">Accuracy</th>
+            <th scope="col" style="font-size:0.8125rem;">Precision</th>
+            <th scope="col" style="font-size:0.8125rem;">Recall</th>
+            <th scope="col" style="font-size:0.8125rem;">F1 Score</th>
+            <th scope="col" style="font-size:0.8125rem;">ROC-AUC</th>
+            <th scope="col" style="font-size:0.8125rem;">Status / Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-award-fill text-warning fs-5" aria-hidden="true"></i>
+                <div>
+                  <div style="font-weight:700;">Random Forest Classifier</div>
+                  <div style="font-size:0.75rem; color:var(--fc-text-muted);">Ensemble Bagging Trees</div>
+                </div>
+              </div>
+            </td>
+            <td><strong style="color:var(--fc-primary);">92.21%</strong></td>
+            <td>75.00%</td>
+            <td>60.00%</td>
+            <td><span class="badge bg-success-subtle text-success border border-success-subtle">0.6667</span></td>
+            <td>0.9007</td>
+            <td><span class="fc-badge-active badge"><i class="bi bi-check-circle me-1"></i>Active Champion</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-patch-check-fill text-secondary fs-5" aria-hidden="true"></i>
+                <div>
+                  <div style="font-weight:700;">XGBoost Classifier</div>
+                  <div style="font-size:0.75rem; color:var(--fc-text-muted);">Extreme Gradient Boosting</div>
+                </div>
+              </div>
+            </td>
+            <td><strong>91.80%</strong></td>
+            <td>74.20%</td>
+            <td>59.50%</td>
+            <td><span class="badge bg-light text-dark border">0.6601</span></td>
+            <td>0.8950</td>
+            <td><span class="badge bg-secondary">Runner-Up</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-cpu fs-5 text-muted" aria-hidden="true"></i>
+                <div>
+                  <div style="font-weight:700;">Gradient Boosting Classifier</div>
+                  <div style="font-size:0.75rem; color:var(--fc-text-muted);">Sequential Boosting Trees</div>
+                </div>
+              </div>
+            </td>
+            <td>90.50%</td>
+            <td>72.10%</td>
+            <td>58.00%</td>
+            <td><span class="badge bg-light text-dark border">0.6425</span></td>
+            <td>0.8810</td>
+            <td><span class="badge bg-light text-dark border">Evaluated</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-diagram-3 fs-5 text-muted" aria-hidden="true"></i>
+                <div>
+                  <div style="font-weight:700;">Deep Learning (MLP Classifier)</div>
+                  <div style="font-size:0.75rem; color:var(--fc-text-muted);">Multi-Layer Perceptron Neural Net</div>
+                </div>
+              </div>
+            </td>
+            <td>89.10%</td>
+            <td>70.50%</td>
+            <td>57.20%</td>
+            <td><span class="badge bg-light text-dark border">0.6310</span></td>
+            <td>0.8720</td>
+            <td><span class="badge bg-light text-dark border">Evaluated</span></td>
+          </tr>
+          <tr>
+            <td>
+              <div class="d-flex align-items-center gap-2">
+                <i class="bi bi-bar-chart fs-5 text-muted" aria-hidden="true"></i>
+                <div>
+                  <div style="font-weight:700;">Logistic Regression</div>
+                  <div style="font-size:0.75rem; color:var(--fc-text-muted);">Linear Classification Model</div>
+                </div>
+              </div>
+            </td>
+            <td>84.30%</td>
+            <td>65.00%</td>
+            <td>51.00%</td>
+            <td><span class="badge bg-light text-dark border">0.5710</span></td>
+            <td>0.8150</td>
+            <td><span class="badge bg-light text-dark border">Baseline</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

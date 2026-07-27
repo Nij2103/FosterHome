@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Account{% endblock %}
+{% block meta_description %}Register for the Foster Care Placement Predictor system.{% endblock %}
+
+{% block content %}
+<div class="fc-auth-wrapper" style="padding:2rem 0;">
+  <div class="fc-auth-card" style="max-width:540px;">
+
+    <!-- Logo -->
+    <div class="fc-auth-logo">
+      <div class="fc-logo-icon" aria-hidden="true">
+        <i class="bi bi-person-plus-fill"></i>
+      </div>
+      <h1 class="fc-auth-title">Create Your Account</h1>
+      <p class="fc-auth-subtitle">Join the Foster Care Placement Predictor platform</p>
+    </div>
+
+    <!-- Register form -->
+    <form method="post" novalidate aria-label="Registration form">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
+          {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        </div>
+      {% endif %}
+
+      <div class="row g-3">
+
+        <!-- First Name -->
+        <div class="col-12 col-sm-6">
+          <label for="{{ form.first_name.id_for_label }}" class="form-label">First Name</label>
+          {{ form.first_name }}
+          {% if form.first_name.errors %}
+            <div class="invalid-feedback d-block">{{ form.first_name.errors.as_text }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Last Name -->
+        <div class="col-12 col-sm-6">
+          <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+          {{ form.last_name }}
+          {% if form.last_name.errors %}
+            <div class="invalid-feedback d-block">{{ form.last_name.errors.as_text }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Username -->
+        <div class="col-12">
+          <label for="{{ form.username.id_for_label }}" class="form-label">
+            Username <span class="text-danger" aria-hidden="true">*</span>
+          </label>
+          {{ form.username }}
+          {% if form.username.errors %}
+            <div class="invalid-feedback d-block">{{ form.username.errors.as_text }}</div>
+          {% endif %}
+          <div class="form-text">Letters, digits, and @/./+/-/_ only.</div>
+        </div>
+
+        <!-- Email -->
+        <div class="col-12">
+          <label for="{{ form.email.id_for_label }}" class="form-label">
+            Email Address <span class="text-danger" aria-hidden="true">*</span>
+          </label>
+          {{ form.email }}
+          {% if form.email.errors %}
+            <div class="invalid-feedback d-block">{{ form.email.errors.as_text }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Role Notice -->
+        <div class="col-12">
+          <div class="alert alert-info py-2 px-3 mb-0" style="font-size:0.8125rem;">
+            <i class="bi bi-info-circle-fill me-2" aria-hidden="true"></i>
+            <strong>Default Access Level:</strong> Self-registered accounts are created as <strong>Viewer</strong> (read-only + prediction requests). Role promotions to Case Worker or Admin are assigned by a system Administrator.
+          </div>
+        </div>
+
+
+        <!-- Password 1 -->
+        <div class="col-12">
+          <label for="{{ form.password1.id_for_label }}" class="form-label">
+            Password <span class="text-danger" aria-hidden="true">*</span>
+          </label>
+          {{ form.password1 }}
+          {% if form.password1.errors %}
+            <div class="invalid-feedback d-block">{{ form.password1.errors.as_text }}</div>
+          {% endif %}
+          <div class="form-text">At least 8 characters. Must not be entirely numeric.</div>
+        </div>
+
+        <!-- Password 2 -->
+        <div class="col-12">
+          <label for="{{ form.password2.id_for_label }}" class="form-label">
+            Confirm Password <span class="text-danger" aria-hidden="true">*</span>
+          </label>
+          {{ form.password2 }}
+          {% if form.password2.errors %}
+            <div class="invalid-feedback d-block">{{ form.password2.errors.as_text }}</div>
+          {% endif %}
+        </div>
+
+        <!-- Terms -->
+        <div class="col-12">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="reg-terms" name="terms" required>
+            <label class="form-check-label" for="reg-terms">
+              I confirm that I am an authorized child welfare professional and agree to use
+              this system in accordance with applicable regulations and data privacy requirements.
+              <span class="text-danger" aria-hidden="true">*</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div class="col-12">
+          <button type="submit" class="btn btn-primary btn-lg w-100 btn-icon">
+            <i class="bi bi-person-check-fill" aria-hidden="true"></i>
+            Create Account
+          </button>
+        </div>
+
+      </div><!-- /.row -->
+
+    </form>
+
+    <div class="fc-section-divider my-4">already have an account?</div>
+    <p class="text-center mb-0" style="font-size:0.875rem; color:var(--fc-text-muted);">
+      <a href="{% url 'accounts:login' %}" class="fc-text-primary" style="font-weight:600;">Sign in here</a>
+    </p>
+
+  </div>
+</div>
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.fc-auth-card input[type="text"], .fc-auth-card input[type="email"], .fc-auth-card input[type="password"], .fc-auth-card select').forEach(function (el) {
+      if (!el.classList.contains('form-check-input')) {
+        el.classList.add(el.tagName === 'SELECT' ? 'form-select' : 'form-control');
+      }
+    });
+  });
+</script>
+{% endblock %}
+{% endblock %}

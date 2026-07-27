@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About{% endblock %}
+{% block meta_description %}Learn about the Foster Care Placement Predictor — its mission, methodology, technology, and the team behind it.{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">About</li>
+      </ol>
+    </nav>
+    <h1 class="mt-1">About the System</h1>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- MISSION SECTION -->
+  <div class="row g-5 align-items-center mb-5">
+
+    <div class="col-12 col-lg-6">
+      <span class="fc-section-label">Our Mission</span>
+      <h2 class="fc-section-title">Putting Children First Through Better Data</h2>
+      <p style="color:var(--fc-text-muted); line-height:1.8; margin-bottom:1.25rem;">
+        The Foster Care Placement Predictor was developed to address one of the most
+        challenging problems in child welfare: matching children with the right foster
+        families. Placement disruptions — where a child must return to care because a
+        placement breaks down — have lasting negative effects on child development.
+      </p>
+      <p style="color:var(--fc-text-muted); line-height:1.8; margin-bottom:1.25rem;">
+        By applying machine learning to historical placement data, we help case workers
+        identify the most compatible placements earlier, reducing disruption risk and
+        improving long-term outcomes for children and families alike.
+      </p>
+      <p style="color:var(--fc-text-muted); line-height:1.8;">
+        <strong style="color:var(--fc-text);">Important:</strong> All data in this system is
+        synthetically generated for demonstration purposes. No real child or family records
+        are stored. Prediction scores are decision-support tools, not placement decisions —
+        they must be reviewed by qualified case workers.
+      </p>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <!-- Mission visual / key stats -->
+      <div class="fc-card fc-card-body">
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="text-center p-3" style="background:var(--fc-primary-light); border-radius:var(--fc-radius-sm);">
+              <div style="font-size:2rem; font-weight:800; color:var(--fc-primary); line-height:1;">91%</div>
+              <div style="font-size:0.8125rem; color:var(--fc-text-muted); margin-top:0.25rem;">Model Accuracy<br>(validation set)</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="text-center p-3" style="background:var(--fc-accent-light); border-radius:var(--fc-radius-sm);">
+              <div style="font-size:2rem; font-weight:800; color:var(--fc-accent); line-height:1;">5+</div>
+              <div style="font-size:0.8125rem; color:var(--fc-text-muted); margin-top:0.25rem;">ML Models<br>Evaluated</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="text-center p-3" style="background:#E8F5E9; border-radius:var(--fc-radius-sm);">
+              <div style="font-size:2rem; font-weight:800; color:var(--fc-success); line-height:1;">20+</div>
+              <div style="font-size:0.8125rem; color:var(--fc-text-muted); margin-top:0.25rem;">Analytics<br>Charts</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="text-center p-3" style="background:#FFF8E1; border-radius:var(--fc-radius-sm);">
+              <div style="font-size:2rem; font-weight:800; color:var(--fc-warning); line-height:1;">3</div>
+              <div style="font-size:0.8125rem; color:var(--fc-text-muted); margin-top:0.25rem;">User Roles<br>Supported</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="fc-divider">
+
+  <!-- OBJECTIVES -->
+  <div class="mb-5">
+    <div class="text-center mb-4">
+      <span class="fc-section-label">What We Aim to Achieve</span>
+      <h2 class="fc-section-title">System Objectives</h2>
+    </div>
+
+    <div class="row g-4">
+
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="fc-objective-card">
+          <div class="fc-feature-icon mb-3" style="width:44px;height:44px;font-size:1.25rem;">
+            <i class="bi bi-graph-up-arrow" aria-hidden="true"></i>
+          </div>
+          <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.5rem;">Reduce Disruptions</h3>
+          <p style="font-size:0.8125rem; color:var(--fc-text-muted); margin:0; line-height:1.7;">
+            Use predictive modeling to identify high-risk placements before
+            they are formalized, giving case workers early warning signals.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="fc-objective-card">
+          <div class="fc-feature-icon mb-3" style="width:44px;height:44px;font-size:1.25rem;">
+            <i class="bi bi-person-check-fill" aria-hidden="true"></i>
+          </div>
+          <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.5rem;">Support Case Workers</h3>
+          <p style="font-size:0.8125rem; color:var(--fc-text-muted); margin:0; line-height:1.7;">
+            Provide professionals with data-driven insights that complement
+            — not replace — their expertise and relationships with families.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="fc-objective-card">
+          <div class="fc-feature-icon mb-3" style="width:44px;height:44px;font-size:1.25rem; background:var(--fc-accent-light); color:var(--fc-accent);">
+            <i class="bi bi-shield-fill-check" aria-hidden="true"></i>
+          </div>
+          <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.5rem;">Ensure Privacy</h3>
+          <p style="font-size:0.8125rem; color:var(--fc-text-muted); margin:0; line-height:1.7;">
+            All training data is synthetic. Role-based access control ensures
+            only authorized staff can view or modify sensitive records.
+          </p>
+        </div>
+      </div>
+
+      <div class="col-12 col-md-6 col-lg-3">
+        <div class="fc-objective-card">
+          <div class="fc-feature-icon mb-3" style="width:44px;height:44px;font-size:1.25rem; background:var(--fc-accent-light); color:var(--fc-accent);">
+            <i class="bi bi-file-earmark-text-fill" aria-hidden="true"></i>
+          </div>
+          <h3 style="font-size:1rem; font-weight:700; margin-bottom:0.5rem;">Enable Compliance</h3>
+          <p style="font-size:0.8125rem; color:var(--fc-text-muted); margin:0; line-height:1.7;">
+            Full audit trails, exportable PDF/CSV reports, and model version
+            tracking ensure the system meets regulatory and compliance needs.
+          </p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="fc-divider">
+
+  <!-- TECHNOLOGY STACK -->
+  <div class="mb-5">
+    <div class="text-center mb-4">
+      <span class="fc-section-label">Built With</span>
+      <h2 class="fc-section-title">Technology Stack</h2>
+      <p class="fc-section-subtitle mx-auto">
+        Open-source, production-grade technologies used throughout the system.
+      </p>
+    </div>
+
+    <div class="d-flex flex-wrap gap-3 justify-content-center">
+      <span class="fc-tech-pill"><i class="bi bi-filetype-py" aria-hidden="true"></i> Python 3.12</span>
+      <span class="fc-tech-pill"><i class="bi bi-layers-fill" aria-hidden="true"></i> Django 5</span>
+      <span class="fc-tech-pill"><i class="bi bi-cpu" aria-hidden="true"></i> scikit-learn</span>
+      <span class="fc-tech-pill"><i class="bi bi-table" aria-hidden="true"></i> pandas</span>
+      <span class="fc-tech-pill"><i class="bi bi-bar-chart-fill" aria-hidden="true"></i> matplotlib</span>
+      <span class="fc-tech-pill"><i class="bi bi-database-fill" aria-hidden="true"></i> SQLite / PostgreSQL</span>
+      <span class="fc-tech-pill"><i class="bi bi-bootstrap-fill" aria-hidden="true"></i> Bootstrap 5</span>
+      <span class="fc-tech-pill"><i class="bi bi-file-pdf-fill" aria-hidden="true"></i> ReportLab</span>
+      <span class="fc-tech-pill"><i class="bi bi-code-slash" aria-hidden="true"></i> Django REST Framework</span>
+      <span class="fc-tech-pill"><i class="bi bi-grid-3x3" aria-hidden="true"></i> openpyxl</span>
+    </div>
+  </div>
+
+  <hr class="fc-divider">
+
+  <!-- DATA ETHICS NOTE -->
+  <div class="fc-card fc-card-body" style="border-left:4px solid var(--fc-accent);">
+    <div class="d-flex align-items-start gap-3">
+      <i class="bi bi-info-circle-fill fc-text-accent mt-1" style="font-size:1.25rem; flex-shrink:0;" aria-hidden="true"></i>
+      <div>
+        <h2 style="font-size:1rem; font-weight:700; margin-bottom:0.5rem;">Data Ethics Statement</h2>
+        <p style="font-size:0.875rem; color:var(--fc-text-muted); margin:0; line-height:1.8;">
+          Every child and family record in this system is <strong>entirely synthetic</strong>, generated
+          by a controlled data pipeline using statistical distributions derived from publicly available
+          AFCARS (Adoption and Foster Care Analysis and Reporting System) aggregate data — never from
+          actual case files. Machine learning compatibility scores are decision-support tools only.
+          All placement decisions must be made by qualified child welfare professionals in accordance
+          with local regulations and best practices.
+        </p>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /.container -->
+{% endblock %}

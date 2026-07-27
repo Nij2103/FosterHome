@@ -1,0 +1,212 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact{% endblock %}
+{% block meta_description %}Contact the Foster Care Placement Predictor support team — reach us by email, phone, or by submitting a message through our contact form.{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Contact</li>
+      </ol>
+    </nav>
+    <h1 class="mt-1">Contact Us</h1>
+    <p class="fc-breadcrumb mt-1">Get in touch with the support team or submit a general enquiry.</p>
+  </div>
+</div>
+
+<div class="container pb-5">
+  <div class="row g-5">
+
+    <!-- CONTACT FORM — Left -->
+    <div class="col-12 col-lg-7">
+
+      <div class="fc-form-section">
+
+        <h2 class="fc-form-section-title">
+          <i class="bi bi-envelope-fill fc-text-primary" aria-hidden="true"></i>
+          Send Us a Message
+        </h2>
+        <p style="font-size:0.875rem; color:var(--fc-text-muted); margin-bottom:1.75rem;">
+          Fill in the form below and a member of our support team will get back to you
+          within 1–2 working days.
+        </p>
+
+        <form method="post" novalidate aria-label="Contact form">
+          {% csrf_token %}
+
+          <div class="row g-3">
+
+            <div class="col-12 col-sm-6">
+              <label for="contact-first-name" class="form-label">
+                First Name <span class="text-danger" aria-hidden="true">*</span>
+              </label>
+              <input type="text" id="contact-first-name" name="first_name"
+                     class="form-control" placeholder="e.g. Sarah"
+                     required autocomplete="given-name"
+                     aria-required="true">
+            </div>
+
+            <div class="col-12 col-sm-6">
+              <label for="contact-last-name" class="form-label">
+                Last Name <span class="text-danger" aria-hidden="true">*</span>
+              </label>
+              <input type="text" id="contact-last-name" name="last_name"
+                     class="form-control" placeholder="e.g. Johnson"
+                     required autocomplete="family-name"
+                     aria-required="true">
+            </div>
+
+            <div class="col-12">
+              <label for="contact-email" class="form-label">
+                Email Address <span class="text-danger" aria-hidden="true">*</span>
+              </label>
+              <input type="email" id="contact-email" name="email"
+                     class="form-control" placeholder="you@organization.gov"
+                     required autocomplete="email"
+                     aria-required="true">
+            </div>
+
+            <div class="col-12">
+              <label for="contact-organization" class="form-label">Organization / Agency</label>
+              <input type="text" id="contact-organization" name="organization"
+                     class="form-control" placeholder="e.g. Department of Children and Families"
+                     autocomplete="organization">
+            </div>
+
+            <div class="col-12">
+              <label for="contact-subject" class="form-label">
+                Subject <span class="text-danger" aria-hidden="true">*</span>
+              </label>
+              <select id="contact-subject" name="subject" class="form-select"
+                      required aria-required="true">
+                <option value="" disabled selected>Select a topic…</option>
+                <option value="technical">Technical Support</option>
+                <option value="training">Training &amp; Onboarding</option>
+                <option value="data">Data &amp; Privacy</option>
+                <option value="access">Account Access</option>
+                <option value="feedback">Feedback &amp; Suggestions</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label for="contact-message" class="form-label">
+                Message <span class="text-danger" aria-hidden="true">*</span>
+              </label>
+              <textarea id="contact-message" name="message"
+                        class="form-control" rows="6"
+                        placeholder="Please describe your question or issue in as much detail as possible…"
+                        required aria-required="true"
+                        style="resize:vertical;"></textarea>
+              <div class="form-text">Minimum 20 characters. Please do not include real client PII in your message.</div>
+            </div>
+
+            <div class="col-12">
+              <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="contact-consent" name="consent" required>
+                <label class="form-check-label" for="contact-consent">
+                  I understand that my contact details will be used to respond to this enquiry and
+                  will not be shared with third parties.
+                  <span class="text-danger" aria-hidden="true">*</span>
+                </label>
+              </div>
+            </div>
+
+          </div><!-- /.row.g-3 -->
+
+          <button type="submit" class="btn btn-primary btn-lg btn-icon w-100">
+            <i class="bi bi-send-fill" aria-hidden="true"></i>
+            Send Message
+          </button>
+
+        </form>
+
+      </div><!-- /.fc-form-section -->
+    </div>
+
+    <!-- CONTACT INFO — Right -->
+    <div class="col-12 col-lg-5">
+
+      <h2 class="fc-section-title mb-4" style="font-size:1.375rem;">Contact Information</h2>
+
+      <!-- Address -->
+      <div class="fc-contact-info-card">
+        <div class="fc-contact-icon-wrap" aria-hidden="true">
+          <i class="bi bi-geo-alt-fill"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:0.9375rem; margin-bottom:0.25rem;">Office Address</div>
+          <div style="font-size:0.875rem; color:var(--fc-text-muted); line-height:1.7;">
+            Foster Care Center<br>
+            Near Devpura patiya Deesa Highway<br>
+            Palanpur, Gujarat 385001
+          </div>
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div class="fc-contact-info-card">
+        <div class="fc-contact-icon-wrap" aria-hidden="true">
+          <i class="bi bi-telephone-fill"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:0.9375rem; margin-bottom:0.25rem;">Phone</div>
+          <div style="font-size:0.875rem; color:var(--fc-text-muted);">
+            <a href="tel:+919227010270" class="fc-text-primary">+91 92270 10270</a><br>
+            Mon – Fri, 9:00 AM – 6:00 PM IST
+          </div>
+        </div>
+      </div>
+
+      <!-- Email -->
+      <div class="fc-contact-info-card">
+        <div class="fc-contact-icon-wrap" aria-hidden="true">
+          <i class="bi bi-envelope-fill"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:0.9375rem; margin-bottom:0.25rem;">Email</div>
+          <div style="font-size:0.875rem; color:var(--fc-text-muted);">
+            <a href="mailto:nijspare2103@gmail.com" class="fc-text-primary">nijspare2103@gmail.com</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Response time -->
+      <div class="fc-contact-info-card" style="border-left:3px solid var(--fc-primary);">
+        <div class="fc-contact-icon-wrap" style="background:var(--fc-primary-light); color:var(--fc-primary);" aria-hidden="true">
+          <i class="bi bi-clock-fill"></i>
+        </div>
+        <div>
+          <div style="font-weight:700; font-size:0.9375rem; margin-bottom:0.25rem;">Response Times</div>
+          <div style="font-size:0.875rem; color:var(--fc-text-muted); line-height:1.7;">
+            Technical support: <strong>within 4 hours</strong><br>
+            General enquiries: <strong>1–2 working days</strong><br>
+            Training requests: <strong>3–5 working days</strong>
+          </div>
+        </div>
+      </div>
+
+      <!-- Helpful info box -->
+      <div class="alert alert-info mt-3" role="note">
+        <div class="d-flex gap-2">
+          <i class="bi bi-lightbulb-fill flex-shrink-0 mt-1" aria-hidden="true"></i>
+          <div style="font-size:0.8125rem;">
+            <strong>Before contacting us</strong> — check the
+            <a href="{% url 'api:docs' %}" class="alert-link">API documentation</a>
+            or the <a href="{% url 'core:about' %}" class="alert-link">About page</a>
+            which covers the most common questions.
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /.row -->
+</div><!-- /.container -->
+{% endblock %}

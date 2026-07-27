@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Delete Family{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card p-4">
+      <h1 class="h4 mb-3">Delete Foster Family</h1>
+      <p>Are you sure you want to delete <strong>{{ object.family_name }}</strong>? This also deletes their placement history. This cannot be undone.</p>
+      <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, delete</button>
+        <a href="{% url 'families:detail' object.pk %}" class="btn btn-outline-secondary">Cancel</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

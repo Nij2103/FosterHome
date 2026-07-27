@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load role_tags %}
+
+{% block title %}Placement Detail — {{ placement.child.first_name }} × {{ placement.family.family_name }}{% endblock %}
+
+{% block content %}
+
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'placements:index' %}">Placements</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Placement #{{ placement.pk }}</li>
+      </ol>
+    </nav>
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
+      <div>
+        <h1 class="mb-0">Placement Assignment Details</h1>
+        <p class="fc-breadcrumb mt-1">Record ID #{{ placement.pk }} · Created {{ placement.created_at|date:"M d, Y" }}</p>
+      </div>
+      {% if request.user|can_edit %}
+        <div class="d-flex gap-2">
+          <a href="{% url 'placements:update' placement.pk %}" class="btn btn-outline-primary btn-sm btn-icon">
+            <i class="bi bi-pencil-square" aria-hidden="true"></i> Edit Placement
+          </a>
+          <a href="{% url 'placements:delete' placement.pk %}" class="btn btn-danger btn-sm btn-icon">
+            <i class="bi bi-trash" aria-hidden="true"></i> Delete
+          </a>
+        </div>
+      {% endif %}
+
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <div class="row g-4 mb-4">
+
+    <!-- Child Card -->
+    <div class="col-12 col-md-6">
+      <div class="fc-card h-100">
+        <div class="fc-card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-person me-2 fc-text-primary" aria-hidden="true"></i>Child Profile</span>
+          <a href="{% url 'children:detail' placement.child.pk %}" class="btn btn-sm btn-outline-primary">View Full Profile</a>
+        </div>
+        <div class="fc-card-body">
+          <h2 style="font-size:1.25rem; font-weight:700; margin-bottom:0.25rem;">{{ placement.child.first_name }}</h2>
+          <p class="text-muted" style="font-size:0.875rem;">Age {{ placement.child.age }} · {{ placement.child.get_gender_display }} · {{ placement.child.state }}</p>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <span class="badge bg-light text-dark border">Special Needs: {% if placement.child.special_needs %}Yes{% else %}No{% endif %}</span>
+            <span class="badge bg-light text-dark border">Siblings: {{ placement.child.sibling_group_size }}</span>
+            <span class="badge bg-light text-dark border">Behavioral Index: {{ placement.child.behavioral_notes_score|floatformat:2 }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Family Card -->
+    <div class="col-12 col-md-6">
+      <div class="fc-card h-100">
+        <div class="fc-card-header d-flex justify-content-between align-items-center">
+          <span><i class="bi bi-house-heart me-2 fc-text-accent" aria-hidden="true"></i>Foster Family</span>
+          <a href="{% url 'families:detail' placement.family.pk %}" class="btn btn-sm btn-outline-primary">View Full Profile</a>
+        </div>
+        <div class="fc-card-body">
+          <h2 style="font-size:1.25rem; font-weight:700; margin-bottom:0.25rem;">{{ placement.family.family_name }}</h2>
+          <p class="text-muted" style="font-size:0.875rem;">{{ placement.family.get_home_type_display }} Setting · {{ placement.family.state }}</p>
+          <div class="d-flex flex-wrap gap-2 mt-3">
+            <span class="badge bg-light text-dark border">Experience: {{ placement.family.experience_years }} yrs</span>
+            <span class="badge bg-light text-dark border">Capacity: {{ placement.family.capacity }}</span>
+            <span class="badge bg-light text-dark border">Occupancy: {{ placement.family.current_occupancy }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Placement Metadata & Status -->
+  <div class="fc-card mb-4">
+    <div class="fc-card-header">Placement Lifecycle Details</div>
+    <div class="fc-card-body">
+      <div class="fc-info-grid">
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Current Status</div>
+          <div class="fc-info-item-value">
+            <span class="fc-badge-{{ placement.status }} badge fs-6">
+              {{ placement.get_status_display }}
+            </span>
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Start Date</div>
+          <div class="fc-info-item-value">{{ placement.start_date|date:"F d, Y"|default:"Not Started" }}</div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">End Date</div>
+          <div class="fc-info-item-value">{{ placement.end_date|date:"F d, Y"|default:"Ongoing" }}</div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Assigned Caseworker</div>
+          <div class="fc-info-item-value">{{ placement.placed_by.username|default:"Unassigned / System" }}</div>
+        </div>
+
+      </div>
+
+      {% if placement.status == 'disrupted' and placement.disruption_reason %}
+        <div class="alert alert-danger mt-4 mb-0" role="alert">
+          <h3 style="font-size:0.9375rem; font-weight:700; margin-bottom:0.375rem;">
+            <i class="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i> Disruption Reason Logged
+          </h3>
+          <p class="mb-0" style="font-size:0.875rem; line-height:1.6;">
+            {{ placement.disruption_reason }}
+          </p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
