@@ -48,8 +48,8 @@ LOCAL_APPS = [
     "apps.families",
     "apps.placements",
     "apps.predictions",
-    "apps.reports",
     "apps.analytics",
+    "apps.reports",
     "apps.core",
     "apps.api",
 ]

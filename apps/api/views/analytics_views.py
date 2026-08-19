@@ -16,7 +16,6 @@ from apps.children.models import Child
 from apps.families.models import FosterFamily
 from apps.placements.models import Placement
 from apps.predictions.models import Prediction
-from apps.reports.models import Report
 
 
 class DashboardStatsView(APIView):
@@ -33,5 +32,4 @@ class DashboardStatsView(APIView):
             "active_placements": Placement.objects.filter(status="active").count(),
             "disrupted_placements": Placement.objects.filter(status="disrupted").count(),
             "total_predictions": Prediction.objects.count(),
-            "total_reports": Report.objects.count(),
         })

@@ -6,8 +6,6 @@ app_name = "children"
 
 urlpatterns = [
     path("", views.ChildListView.as_view(), name="index"),
-    path("export/csv/", views.export_children_csv, name="export_csv"),
-
     path("add/", views.ChildCreateView.as_view(), name="create"),
     path("<int:pk>/", views.ChildDetailView.as_view(), name="detail"),
     path("<int:pk>/edit/", views.ChildUpdateView.as_view(), name="update"),

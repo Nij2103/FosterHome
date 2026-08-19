@@ -31,8 +31,27 @@
           Select Candidate Pair
         </h2>
         <p style="font-size:0.875rem; color:var(--fc-text-muted); margin-bottom:1.5rem;">
-          Choose a child in care and an active foster family. Use the search filters to quickly locate candidate names.
+          Search and select a child in care and an active foster family directly in the candidate fields below.
         </p>
+
+        {% if is_viewer %}
+          {% if user_family_count == 0 %}
+            <div class="alert alert-warning border-0 mb-4" role="alert">
+              <div class="d-flex align-items-start gap-3">
+                <i class="bi bi-exclamation-triangle-fill fs-4 flex-shrink-0 text-warning" aria-hidden="true"></i>
+                <div>
+                  <h5 class="alert-heading h6 font-weight-bold mb-1">Foster Family Required</h5>
+                  <p style="font-size:0.875rem;" class="mb-2">
+                    As a <strong>Viewer</strong>, you must add at least one foster family to your account before you can request predictions. Only foster families created by you can be evaluated in predictions.
+                  </p>
+                  <a href="{% url 'families:create' %}" class="btn btn-warning btn-sm fw-bold">
+                    <i class="bi bi-house-add-fill me-1"></i> Add Foster Family Now
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endif %}
+        {% endif %}
 
         <form method="post" novalidate aria-label="Request prediction form">
           {% csrf_token %}
@@ -44,16 +63,11 @@
             </div>
           {% endif %}
 
-          <!-- Child Selection with Quick Search -->
+          <!-- Child Selection Field -->
           <div class="mb-4">
-            <label for="{{ form.child.id_for_label }}" class="form-label d-flex justify-content-between align-items-center">
-              <span>Child Record <span class="text-danger" aria-hidden="true">*</span></span>
-              <span class="text-muted" style="font-size:0.75rem; font-weight:normal;">Quick Search below</span>
+            <label for="id_child" class="form-label font-weight-bold">
+              Child Record <span class="text-danger" aria-hidden="true">*</span>
             </label>
-            <div class="input-group input-group-sm mb-1">
-              <span class="input-group-text"><i class="bi bi-search"></i></span>
-              <input type="text" id="childSearchFilter" class="form-control" placeholder="Type to filter children by name..." aria-label="Filter children">
-            </div>
             {{ form.child }}
             {% if form.child.errors %}
               <div class="invalid-feedback d-block">{{ form.child.errors.as_text }}</div>
@@ -61,34 +75,28 @@
             <div class="form-text">Select child needing placement evaluation.</div>
           </div>
 
-          <!-- Family Selection with Quick Search -->
+          <!-- Family Selection Field -->
           <div class="mb-4">
-            <label for="{{ form.family.id_for_label }}" class="form-label d-flex justify-content-between align-items-center">
-              <span>Candidate Foster Family <span class="text-danger" aria-hidden="true">*</span></span>
-              <span class="text-muted" style="font-size:0.75rem; font-weight:normal;">Quick Search below</span>
+            <label for="id_family" class="form-label font-weight-bold">
+              Candidate Foster Family <span class="text-danger" aria-hidden="true">*</span>
             </label>
-            <div class="input-group input-group-sm mb-1">
-              <span class="input-group-text"><i class="bi bi-search"></i></span>
-              <input type="text" id="familySearchFilter" class="form-control" placeholder="Type to filter families by name..." aria-label="Filter families">
-            </div>
             {{ form.family }}
             {% if form.family.errors %}
               <div class="invalid-feedback d-block">{{ form.family.errors.as_text }}</div>
             {% endif %}
-            <div class="form-text">Select candidate foster family with available capacity.</div>
-          </div>
-
-          <div class="alert alert-info border-0 mb-4" style="background:var(--fc-primary-light); color:var(--fc-primary-dark);">
-            <div class="d-flex gap-2">
-              <i class="bi bi-info-circle-fill flex-shrink-0 mt-1" aria-hidden="true"></i>
-              <div style="font-size:0.8125rem;">
-                <strong>Model Inference Info:</strong> Predictions utilize the current active Scikit-Learn pipeline trained on placement records. Running a prediction logs an entry into the audit trail.
-              </div>
+            <div class="form-text">
+              {% if is_viewer %}
+                Showing candidate foster families registered by your account.
+              {% else %}
+                Select candidate foster family with available capacity.
+              {% endif %}
             </div>
           </div>
 
           <div class="d-flex gap-3">
-            <button type="submit" class="btn btn-primary btn-lg btn-icon w-100 justify-content-center">
+            <button type="submit" 
+                    class="btn btn-primary btn-lg btn-icon w-100 justify-content-center"
+                    {% if is_viewer and user_family_count == 0 %}disabled title="Please add at least one foster family first"{% endif %}>
               <i class="bi bi-play-circle-fill" aria-hidden="true"></i>
               Calculate Compatibility Score
             </button>
@@ -101,44 +109,42 @@
     <!-- Right Column: Smart Matching Recommendations Panel (Admin / Case Worker) -->
     <div class="col-12 col-lg-6">
       {% if request.user|can_edit %}
-        <div class="fc-card h-100 d-flex flex-column justify-content-between">
-          <div>
-            <div class="fc-card-header d-flex align-items-center justify-content-between py-3">
-              <span>
-                <i class="bi bi-stars text-warning me-2" aria-hidden="true"></i>
-                <strong>Smart Matching Recommendations</strong>
-              </span>
-              <span class="badge bg-primary text-white" style="font-size:0.75rem;">ML Engine</span>
+        <div class="fc-card h-100 d-flex flex-column">
+          <div class="fc-card-header d-flex align-items-center justify-content-between py-3">
+            <span>
+              <i class="bi bi-stars text-warning me-2" aria-hidden="true"></i>
+              <strong>Smart Matching Recommendations</strong>
+            </span>
+            <span class="badge bg-primary text-white" style="font-size:0.75rem;">ML Engine</span>
+          </div>
+
+          <div class="fc-card-body d-flex flex-column flex-grow-1" id="matchingResultsContainer">
+            <!-- Initial Prompt State -->
+            <div class="text-center my-auto py-4 text-muted" id="matchingPromptState">
+              <div class="fc-feature-icon mx-auto mb-3" style="width:56px;height:56px;font-size:1.5rem;background:var(--fc-primary-light);color:var(--fc-primary);">
+                <i class="bi bi-person-bounding-box" aria-hidden="true"></i>
+              </div>
+              <h3 style="font-size:1rem; font-weight:700;" class="text-dark">Select Candidate &amp; Click Button Below</h3>
+              <p style="font-size:0.8125rem; max-width:360px;" class="mx-auto text-muted mb-0">
+                Select a child or foster family on the left, then click <strong>"Find Suitable Matches"</strong> below to generate ranked ML recommendations.
+              </p>
             </div>
 
-            <div class="fc-card-body" id="matchingResultsContainer">
-              <!-- Initial Prompt State -->
-              <div class="text-center py-4 text-muted" id="matchingPromptState">
-                <div class="fc-feature-icon mx-auto mb-3" style="width:56px;height:56px;font-size:1.5rem;background:var(--fc-primary-light);color:var(--fc-primary);">
-                  <i class="bi bi-person-bounding-box" aria-hidden="true"></i>
-                </div>
-                <h3 style="font-size:1rem; font-weight:700;" class="text-dark">Select Candidate &amp; Click Button Below</h3>
-                <p style="font-size:0.8125rem; max-width:360px;" class="mx-auto text-muted mb-0">
-                  Select a child or foster family on the left, then click <strong>"Find Suitable Matches"</strong> below to generate ranked ML recommendations.
-                </p>
+            <!-- Loading Spinner State -->
+            <div class="text-center my-auto py-4 d-none" id="matchingLoadingState">
+              <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Calculating suitability matches...</span>
               </div>
-
-              <!-- Loading Spinner State -->
-              <div class="text-center py-4 d-none" id="matchingLoadingState">
-                <div class="spinner-border text-primary mb-3" role="status">
-                  <span class="visually-hidden">Calculating suitability matches...</span>
-                </div>
-                <p style="font-size:0.875rem; font-weight:600;" class="text-dark mb-0">Running Suitability &amp; Compatibility Analysis...</p>
-                <p style="font-size:0.75rem;" class="text-muted">Filtering out hard-constraint mismatches &amp; low-scoring pairs</p>
-              </div>
-
-              <!-- Match Results Container -->
-              <div id="matchingListContent"></div>
+              <p style="font-size:0.875rem; font-weight:600;" class="text-dark mb-0">Running Suitability &amp; Compatibility Analysis...</p>
+              <p style="font-size:0.75rem;" class="text-muted">Filtering out hard-constraint mismatches &amp; low-scoring pairs</p>
             </div>
+
+            <!-- Match Results Container -->
+            <div id="matchingListContent" class="flex-grow-1 d-flex flex-column"></div>
           </div>
 
           <!-- Bottom Action Button for Triggering Matching -->
-          <div class="fc-card-footer bg-white border-top p-3">
+          <div class="fc-card-footer bg-white border-top p-3 mt-auto">
             <button type="button" id="btnRunMatching" class="btn btn-outline-primary btn-sm btn-icon w-100 justify-content-center py-2">
               <i class="bi bi-stars" aria-hidden="true"></i>
               Find Suitable Matches
@@ -163,158 +169,7 @@
 </div>
 
 {% block extra_scripts %}
-<script>
-  document.addEventListener('DOMContentLoaded', function () {
-    const childSelect = document.getElementById('{{ form.child.id_for_label }}');
-    const familySelect = document.getElementById('{{ form.family.id_for_label }}');
-    const childSearch = document.getElementById('childSearchFilter');
-    const familySearch = document.getElementById('familySearchFilter');
-    const btnRunMatching = document.getElementById('btnRunMatching');
-    
-    if (childSelect) childSelect.classList.add('form-select');
-    if (familySelect) familySelect.classList.add('form-select');
-
-    // --- Search Filter Logic for Dropdowns ---
-    function setupSelectSearch(searchInput, selectEl) {
-      if (!searchInput || !selectEl) return;
-      const originalOptions = Array.from(selectEl.options);
-
-      searchInput.addEventListener('input', function () {
-        const query = this.value.toLowerCase().trim();
-        selectEl.innerHTML = '';
-
-        originalOptions.forEach(opt => {
-          if (opt.value === '' || opt.text.toLowerCase().includes(query)) {
-            selectEl.appendChild(opt.cloneNode(true));
-          }
-        });
-      });
-    }
-
-    setupSelectSearch(childSearch, childSelect);
-    setupSelectSearch(familySearch, familySelect);
-
-    // --- Matching Trigger Logic ---
-    const promptState = document.getElementById('matchingPromptState');
-    const loadingState = document.getElementById('matchingLoadingState');
-    const contentBox = document.getElementById('matchingListContent');
-
-    function fetchMatches(paramName, value) {
-      if (!promptState || !loadingState || !contentBox) return;
-
-      promptState.classList.add('d-none');
-      loadingState.classList.remove('d-none');
-      contentBox.innerHTML = '';
-
-      fetch(`{% url 'predictions:matching' %}?${paramName}=${value}`)
-        .then(response => {
-          if (!response.ok) throw new Error('Matching lookup failed');
-          return response.json();
-        })
-        .then(data => {
-          loadingState.classList.add('d-none');
-          renderMatches(data);
-        })
-        .catch(err => {
-          loadingState.classList.add('d-none');
-          contentBox.innerHTML = `
-            <div class="alert alert-warning py-2 px-3 mb-0" style="font-size:0.8125rem;">
-              <i class="bi bi-exclamation-triangle-fill me-2"></i> Unable to load suitable matching recommendations.
-            </div>`;
-        });
-    }
-
-    function renderMatches(data) {
-      if (!data.matches || data.matches.length === 0) {
-        contentBox.innerHTML = `
-          <div class="text-center py-4 text-muted">
-            <i class="bi bi-exclamation-circle text-warning fs-3 mb-2" aria-hidden="true"></i>
-            <h4 style="font-size:0.9375rem; font-weight:700;" class="text-dark">No Suitable Matches Found</h4>
-            <p style="font-size:0.8125rem;" class="mb-0">
-              No candidates passed both hard suitability constraints (capacity, special needs, sibling support) and minimum ML threshold.
-            </p>
-          </div>`;
-        return;
-      }
-
-      const isChildMode = (data.mode === 'child');
-      let html = `
-        <div class="mb-3 d-flex align-items-center justify-content-between">
-          <span style="font-size:0.8125rem; font-weight:700; color:var(--fc-text-muted);">
-            TOP ${data.matches.length} SUITABLE ${isChildMode ? 'FOSTER FAMILIES' : 'CHILDREN'}
-          </span>
-          <span class="badge bg-light text-dark border">${data.matches.length} Candidates</span>
-        </div>
-        <div class="d-flex flex-column gap-2" style="max-height: 420px; overflow-y: auto;">`;
-
-      data.matches.forEach(item => {
-        const badgeColor = item.badge_class === 'success' ? '#2e7d32' : (item.badge_class === 'primary' ? '#1565c0' : '#e65100');
-        const badgeBg = item.badge_class === 'success' ? '#e8f5e9' : (item.badge_class === 'primary' ? '#e3f2fd' : '#fff8e1');
-
-        html += `
-          <div class="p-3 border rounded bg-white shadow-sm d-flex flex-column gap-2">
-            <div class="d-flex align-items-center justify-content-between">
-              <div>
-                <h4 style="font-size:0.9375rem; font-weight:700; margin:0;">${item.name}</h4>
-                <div style="font-size:0.75rem; color:var(--fc-text-muted);">
-                  ${isChildMode 
-                    ? `Cap: ${item.available_slots}/${item.capacity} avail · Exp: ${item.experience_years} yrs · ${item.state}`
-                    : `Age: ${item.age} yrs · ${item.gender} · Special Needs: ${item.special_needs ? 'Yes' : 'No'}`}
-                </div>
-              </div>
-              <div class="text-end">
-                <span class="badge" style="background:${badgeBg}; color:${badgeColor}; font-size:0.8125rem; font-weight:700;">
-                  ${item.score_percent}% ${item.badge_label}
-                </span>
-              </div>
-            </div>
-
-            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
-              <span style="font-size:0.75rem; color:var(--fc-text-muted);">
-                ${isChildMode ? `Home: ${item.home_type}` : `Time in Care: ${item.time_in_care_months} months`}
-              </span>
-              <button type="button" 
-                      class="btn btn-sm btn-outline-primary btn-select-candidate py-1 px-2"
-                      style="font-size:0.75rem; font-weight:600;"
-                      data-type="${isChildMode ? 'family' : 'child'}"
-                      data-id="${item.id}">
-                <i class="bi bi-check2-circle me-1"></i> Select ${isChildMode ? 'Family' : 'Child'}
-              </button>
-            </div>
-          </div>`;
-      });
-
-      html += `</div>`;
-      contentBox.innerHTML = html;
-
-      // Attach click handlers to candidate select buttons
-      contentBox.querySelectorAll('.btn-select-candidate').forEach(btn => {
-        btn.addEventListener('click', function () {
-          const targetType = this.getAttribute('data-type');
-          const targetId = this.getAttribute('data-id');
-
-          if (targetType === 'family' && familySelect) {
-            familySelect.value = targetId;
-          } else if (targetType === 'child' && childSelect) {
-            childSelect.value = targetId;
-          }
-        });
-      });
-    }
-
-    // Explicit Button Trigger Handler
-    if (btnRunMatching) {
-      btnRunMatching.addEventListener('click', function () {
-        if (childSelect && childSelect.value) {
-          fetchMatches('child_id', childSelect.value);
-        } else if (familySelect && familySelect.value) {
-          fetchMatches('family_id', familySelect.value);
-        } else {
-          alert('Please select a Child or Foster Family on the left first.');
-        }
-      });
-    }
-  });
-</script>
+<span id="matching-data" data-url="{% url 'predictions:matching' %}" hidden></span>
+<script src="{% static 'js/prediction_form.js' %}" defer></script>
 {% endblock %}
 {% endblock %}

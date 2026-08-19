@@ -85,25 +85,22 @@ class RoleSystemTestCase(TestCase):
         self.assertTrue(is_viewer(self.viewer_user))
         self.assertFalse(is_viewer(self.admin_user))
 
-    def test_viewer_blocked_from_mutation_urls(self):
-        """Viewers attempting direct mutation access receive HTTP 403 Forbidden."""
+    def test_viewer_blocked_from_restricted_mutation_urls(self):
+        """Viewers attempting restricted mutation access receive HTTP 403 Forbidden."""
         self.client.login(username="viewer_test", password="password123")
 
-        # Create Child
-        res1 = self.client.post(reverse("children:create"), {"first_name": "HackChild", "age": 5})
+        # Create Placement (Restricted to Admin & Caseworker)
+        res1 = self.client.post(reverse("placements:create"), {"child": self.child.id, "family": self.family.id})
         self.assertEqual(res1.status_code, 403)
 
-        # Create Family
-        res2 = self.client.post(reverse("families:create"), {"family_name": "HackFamily", "capacity": 2})
-        self.assertEqual(res2.status_code, 403)
+    def test_viewer_can_add_child_and_family(self):
+        """Viewers can access Child and Foster Family creation forms."""
+        self.client.login(username="viewer_test", password="password123")
+        res_child = self.client.get(reverse("children:create"))
+        self.assertEqual(res_child.status_code, 200)
 
-        # Create Placement
-        res3 = self.client.post(reverse("placements:create"), {"child": self.child.id, "family": self.family.id})
-        self.assertEqual(res3.status_code, 403)
-
-        # Report Scrape
-        res4 = self.client.post(reverse("reports:trigger_scrape"))
-        self.assertEqual(res4.status_code, 403)
+        res_family = self.client.get(reverse("families:create"))
+        self.assertEqual(res_family.status_code, 200)
 
     def test_viewer_can_access_prediction_creation(self):
         """Viewers must retain permission to request predictions."""

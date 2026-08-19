@@ -18,7 +18,6 @@ from apps.api.views.children_views import ChildViewSet
 from apps.api.views.families_views import FosterFamilyViewSet
 from apps.api.views.placements_views import PlacementViewSet
 from apps.api.views.predictions_views import PredictionViewSet
-from apps.api.views.reports_views import ReportViewSet
 
 app_name = "api"
 
@@ -27,7 +26,6 @@ router.register(r"children", ChildViewSet, basename="child")
 router.register(r"families", FosterFamilyViewSet, basename="family")
 router.register(r"placements", PlacementViewSet, basename="placement")
 router.register(r"predictions", PredictionViewSet, basename="prediction")
-router.register(r"reports", ReportViewSet, basename="report")
 
 urlpatterns = [
     path("", include(router.urls)),

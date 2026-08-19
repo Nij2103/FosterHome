@@ -2,7 +2,7 @@
 {% load static %}
 {% load role_tags %}
 
-{% block title %}{{ child.first_name }} — Child Detail{% endblock %}
+{% block title %}{{ child.full_name }} — Child Welfare Profile{% endblock %}
 
 {% block content %}
 
@@ -12,50 +12,81 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
         <li class="breadcrumb-item"><a href="{% url 'children:index' %}">Children</a></li>
-        <li class="breadcrumb-item active" aria-current="page">{{ child.first_name }}</li>
+        <li class="breadcrumb-item active" aria-current="page">{{ child.full_name }}</li>
       </ol>
     </nav>
-    <h1 class="mt-1">Child Profile</h1>
+    <h1 class="mt-1">Child Welfare Profile</h1>
   </div>
 </div>
 
 <div class="container pb-5">
 
   <!-- Header Card -->
-  <div class="fc-detail-header mb-4">
+  <div class="fc-detail-header mb-4 p-4 bg-white border rounded-3 shadow-xs">
     <div class="d-flex align-items-start gap-4 flex-wrap">
-      <div class="fc-detail-avatar" aria-hidden="true">
-        {% if child.gender == 'F' %}
-          <i class="bi bi-person-fill" style="color:var(--fc-accent);"></i>
+      <div class="fc-detail-avatar overflow-hidden rounded-circle border" style="width:96px; height:96px; background:#f0f4f8; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        {% if child.photo %}
+          <img src="{{ child.photo.url }}" alt="{{ child.full_name }}" style="width:100%; height:100%; object-fit:cover;">
         {% else %}
-          <i class="bi bi-person-fill"></i>
+          {% if child.gender == 'F' %}
+            <i class="bi bi-person-fill fs-1" style="color:var(--fc-accent);"></i>
+          {% else %}
+            <i class="bi bi-person-fill fs-1" style="color:var(--fc-primary);"></i>
+          {% endif %}
         {% endif %}
       </div>
+
       <div class="flex-grow-1">
         <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
-          <h2 class="fc-detail-title mb-0">{{ child.first_name }}</h2>
+          <h2 class="fc-detail-title mb-0 fs-3 font-weight-bold">{{ child.full_name }}</h2>
           {% if child.is_placed %}
-            <span class="fc-badge-placed badge">Placed</span>
+            <span class="fc-badge-placed badge bg-success">Placed</span>
           {% else %}
-            <span class="fc-badge-unplaced badge">Not Placed</span>
+            <span class="fc-badge-unplaced badge bg-warning text-dark">Unplaced</span>
           {% endif %}
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ child.legal_status }}</span>
           {% if child.special_needs %}
-            <span class="badge" style="background:#FFF8E1;color:#E65100;">Special Needs</span>
+            <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Special Needs</span>
           {% endif %}
         </div>
-        <p class="fc-detail-meta mb-1">
-          <i class="bi bi-person me-1" aria-hidden="true"></i>{{ child.get_gender_display }}
-          &nbsp;·&nbsp;
-          <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ child.state }}
-          &nbsp;·&nbsp;
+
+        <p class="fc-detail-meta mb-1 text-muted" style="font-size:0.9rem;">
+          <i class="bi bi-person me-1"></i>{{ child.get_gender_display }} &nbsp;·&nbsp;
+          <i class="bi bi-cake2 me-1"></i>{{ child.age }} years old {% if child.date_of_birth %}(DOB: {{ child.date_of_birth|date:"M d, Y" }}){% endif %} &nbsp;·&nbsp;
+          <i class="bi bi-geo-alt me-1"></i>{{ child.state }} &nbsp;·&nbsp;
           ID #{{ child.pk }}
         </p>
-        <p class="fc-detail-meta mb-0" style="font-size:0.8125rem; color:var(--fc-text-muted);">
-          Registered {{ child.created_at|date:"M d, Y" }} &nbsp;·&nbsp; Last updated {{ child.updated_at|date:"M d, Y" }}
+
+        <p class="fc-detail-meta mb-0 text-muted" style="font-size:0.8125rem;">
+          <strong>Assigned Caseworker:</strong> {{ child.caseworker_name }}
+          {% if child.caseworker_contact %}({{ child.caseworker_contact }}){% endif %}
+          &nbsp;·&nbsp; Updated {{ child.updated_at|date:"M d, Y" }}
         </p>
       </div>
+
+      <!-- Profile Completion Meter (Marked Location) -->
+      <div class="fc-completion-widget p-2 px-3 bg-light rounded border d-flex flex-column justify-content-center my-auto" style="min-width: 200px; max-width: 230px;" title="{% if child.profile_completion_score.missing_fields %}Missing fields: {{ child.profile_completion_score.missing_fields|join:', ' }}{% else %}All key fields complete!{% endif %}">
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1" style="font-size:0.8125rem;">
+          <span class="fw-bold text-dark"><i class="bi bi-pie-chart-fill me-1 text-primary"></i>Profile Completion</span>
+          <span class="badge {{ child.profile_completion_score.badge_class }} fw-bold" style="font-size:0.75rem;">{{ child.profile_completion_score.percentage }}%</span>
+        </div>
+        <div class="progress" style="height: 6px; background-color: #cbd5e1;" role="progressbar" aria-valuenow="{{ child.profile_completion_score.percentage }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar {{ child.profile_completion_score.bar_class }}" style="width: {{ child.profile_completion_score.percentage }}%;"></div>
+        </div>
+        <div class="mt-1 d-flex justify-content-between align-items-center text-muted" style="font-size:0.7rem;">
+          <span>{{ child.profile_completion_score.completed_count }}/{{ child.profile_completion_score.total_count }} fields complete</span>
+          {% if child.profile_completion_score.missing_fields %}
+            <span class="text-danger fw-semibold" title="Missing: {{ child.profile_completion_score.missing_fields|join:', ' }}">
+              <i class="bi bi-exclamation-circle me-1"></i>{{ child.profile_completion_score.missing_fields|length }} missing
+            </span>
+          {% else %}
+            <span class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i>Full</span>
+          {% endif %}
+        </div>
+      </div>
+
       <!-- Action buttons -->
-      <div class="d-flex gap-2 flex-wrap">
+      <div class="d-flex gap-2 flex-wrap ms-auto">
         <a href="{% url 'predictions:create' %}?child={{ child.pk }}"
            class="btn btn-primary btn-sm btn-icon">
           <i class="bi bi-cpu" aria-hidden="true"></i> Run Prediction
@@ -63,7 +94,7 @@
         {% if request.user|can_edit %}
           <a href="{% url 'children:update' child.pk %}"
              class="btn btn-outline-primary btn-sm btn-icon">
-            <i class="bi bi-pencil-square" aria-hidden="true"></i> Edit
+            <i class="bi bi-pencil-square" aria-hidden="true"></i> Edit Profile
           </a>
           <a href="{% url 'children:delete' child.pk %}"
              class="btn btn-danger btn-sm btn-icon">
@@ -75,20 +106,172 @@
     </div>
   </div>
 
-  <!-- Info Grid -->
+  <!-- Mandatory Welfare & Emergency Basics Grid -->
   <div class="fc-card mb-4">
-    <div class="fc-card-header">Child Information</div>
+    <div class="fc-card-header bg-light fw-bold">
+      <i class="bi bi-hospital me-2 text-danger"></i>
+      Emergency Medical Basics &amp; Legal Status
+    </div>
     <div class="fc-card-body">
       <div class="fc-info-grid">
 
         <div class="fc-info-item">
-          <div class="fc-info-item-label">Age</div>
-          <div class="fc-info-item-value">{{ child.age }} years old</div>
+          <div class="fc-info-item-label">Full Name</div>
+          <div class="fc-info-item-value fw-semibold">{{ child.full_name }}</div>
         </div>
 
         <div class="fc-info-item">
-          <div class="fc-info-item-label">Gender</div>
-          <div class="fc-info-item-value">{{ child.get_gender_display }}</div>
+          <div class="fc-info-item-label">Blood Group</div>
+          <div class="fc-info-item-value">
+            <span class="badge bg-danger px-2.5 py-1.5 fs-6">{{ child.blood_group }}</span>
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Severe Allergies</div>
+          <div class="fc-info-item-value text-danger fw-semibold">
+            {{ child.severe_allergies|default:"None reported" }}
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Legal Custody Type</div>
+          <div class="fc-info-item-value">{{ child.legal_status }}</div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Assigned Caseworker</div>
+          <div class="fc-info-item-value">{{ child.caseworker_name }}</div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Caseworker Contact</div>
+          <div class="fc-info-item-value">{{ child.caseworker_contact|default:"Not provided" }}</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Additional Welfare & Medical History -->
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-lg-6">
+      <div class="fc-card h-100">
+        <div class="fc-card-header bg-light fw-bold">
+          <i class="bi bi-card-text me-2 text-primary"></i>
+          Cultural &amp; Language Profile
+        </div>
+        <div class="fc-card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Ethnicity / Culture</span>
+              <span class="fw-medium">{{ child.ethnicity|default:"Not recorded" }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Languages Spoken</span>
+              <span class="fw-medium">{{ child.languages_spoken|default:"English" }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Special Needs</span>
+              <span class="fw-medium">
+                {% if child.special_needs and child.special_needs != "None" %}
+                  <span class="badge bg-danger-subtle text-danger">{{ child.special_needs }}</span>
+                {% else %}
+                  <span class="badge bg-success-subtle text-success">None</span>
+                {% endif %}
+              </span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="fc-card h-100">
+        <div class="fc-card-header bg-light fw-bold">
+          <i class="bi bi-hospital me-2 text-danger"></i>
+          Emergency Medical &amp; Caseworker Details
+        </div>
+        <div class="fc-card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Blood Group</span>
+              <span class="fw-medium">{{ child.blood_group }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Known Severe Allergies</span>
+              <span class="fw-medium">{{ child.severe_allergies|default:"None" }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Assigned Caseworker</span>
+              <span class="fw-medium">{{ child.caseworker_name }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Caseworker Phone Number</span>
+              <span class="fw-medium">{{ child.caseworker_contact|default:"Not recorded" }}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Placement & ML Attributes Grid -->
+  <div class="fc-card mb-4">
+    <div class="fc-card-header bg-light fw-bold">
+      <i class="bi bi-cpu me-2 text-primary"></i>
+      Placement System &amp; Support Attributes
+    </div>
+    <div class="fc-card-body">
+      <div class="fc-info-grid">
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Behavioral Support</div>
+          <div class="fc-info-item-value">
+            <span class="badge {% if child.behavioral_support_level == 'High' %}bg-danger{% elif child.behavioral_support_level == 'Medium' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+              {{ child.behavioral_support_level }}
+            </span>
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Mental Health Support</div>
+          <div class="fc-info-item-value">
+            <span class="badge {% if child.mental_health_support_level == 'High' %}bg-danger{% elif child.mental_health_support_level == 'Medium' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+              {{ child.mental_health_support_level }}
+            </span>
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Medical Needs Level</div>
+          <div class="fc-info-item-value">
+            <span class="badge {% if child.medical_needs_level == 'High' %}bg-danger{% elif child.medical_needs_level == 'Medium' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+              {{ child.medical_needs_level }}
+            </span>
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Trauma Severity</div>
+          <div class="fc-info-item-value">
+            <span class="badge {% if child.trauma_severity_level == 'High' %}bg-danger{% elif child.trauma_severity_level == 'Medium' %}bg-warning text-dark{% else %}bg-success{% endif %}">
+              {{ child.trauma_severity_level }}
+            </span>
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Sibling Group Size</div>
+          <div class="fc-info-item-value">
+            {{ child.sibling_group_size }}
+            <span class="text-muted small">(Placement required: {{ child.needs_sibling_placement }})</span>
+          </div>
+        </div>
+
+        <div class="fc-info-item">
+          <div class="fc-info-item-label">Previous Placements</div>
+          <div class="fc-info-item-value">{{ child.previous_foster_placements }} history</div>
         </div>
 
         <div class="fc-info-item">
@@ -97,54 +280,16 @@
         </div>
 
         <div class="fc-info-item">
-          <div class="fc-info-item-label">Education Level</div>
-          <div class="fc-info-item-value">{{ child.education_level|default:"Not recorded" }}</div>
-        </div>
-
-        <div class="fc-info-item">
-          <div class="fc-info-item-label">Special Needs</div>
-          <div class="fc-info-item-value">
-            {% if child.special_needs %}
-              <span class="fc-badge-yes badge">Yes</span>
-            {% else %}
-              <span class="fc-badge-no badge">No</span>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="fc-info-item">
-          <div class="fc-info-item-label">Sibling Group Size</div>
-          <div class="fc-info-item-value">
-            {{ child.sibling_group_size }}
-            {% if child.sibling_group_size == 1 %}
-              <span style="font-size:0.75rem; color:var(--fc-text-muted);">(no siblings)</span>
-            {% else %}
-              <span style="font-size:0.75rem; color:var(--fc-text-muted);">(joint placement needed)</span>
-            {% endif %}
-          </div>
-        </div>
-
-        <div class="fc-info-item">
           <div class="fc-info-item-label">Time in Care</div>
           <div class="fc-info-item-value">{{ child.time_in_care_months }} months</div>
         </div>
 
         <div class="fc-info-item">
-          <div class="fc-info-item-label">Behavioral Score</div>
+          <div class="fc-info-item-label">School Attendance</div>
           <div class="fc-info-item-value">
-            {{ child.behavioral_notes_score|floatformat:2 }}
-            <div class="progress mt-1" style="height:6px;" aria-label="Behavioral score {{ child.behavioral_notes_score|floatformat:2 }} out of 1.0">
-              {% with score_pct=child.behavioral_notes_score|floatformat:0 %}
-                <div class="progress-bar
-                  {% if child.behavioral_notes_score > 0.6 %}bg-danger
-                  {% elif child.behavioral_notes_score > 0.3 %}bg-warning
-                  {% else %}{% endif %}"
-                  role="progressbar"
-                  style="width:{{ child.behavioral_notes_score|floatformat:0 }}0%"
-                  aria-valuenow="{{ child.behavioral_notes_score }}"
-                  aria-valuemin="0" aria-valuemax="1"></div>
-              {% endwith %}
-            </div>
+            <span class="badge {% if child.school_attendance_status == 'Regular' %}bg-success{% elif child.school_attendance_status == 'Irregular' %}bg-warning text-dark{% elif child.school_attendance_status == 'Not Enrolled' %}bg-danger{% else %}bg-secondary{% endif %}">
+              {{ child.school_attendance_status }}
+            </span>
           </div>
         </div>
 
@@ -152,14 +297,14 @@
           <div class="fc-info-item-label">Placement Status</div>
           <div class="fc-info-item-value">
             {% if child.is_placed %}
-              <span class="fc-badge-placed badge">Placed</span>
+              <span class="badge bg-success">Placed</span>
             {% else %}
-              <span class="fc-badge-unplaced badge">Not Placed</span>
+              <span class="badge bg-warning text-dark">Not Placed</span>
             {% endif %}
           </div>
         </div>
 
-      </div><!-- /.fc-info-grid -->
+      </div>
     </div>
   </div>
 
@@ -169,16 +314,13 @@
     <div class="col-12 col-lg-6">
       <div class="fc-table-wrapper">
         <div class="fc-table-header">
-          <h2 class="fc-table-title">
-            <i class="bi bi-shuffle me-2 fc-text-primary" aria-hidden="true"></i>
+          <h2 class="fc-table-title fs-6 fw-bold">
+            <i class="bi bi-shuffle me-2 fc-text-primary"></i>
             Placement History
           </h2>
-          <a href="{% url 'placements:create' %}?child={{ child.pk }}" class="btn btn-sm btn-primary btn-icon">
-            <i class="bi bi-plus-lg" aria-hidden="true"></i> Add
-          </a>
         </div>
         <div class="table-responsive">
-          <table class="table table-hover" aria-label="Placement history for {{ child.first_name }}">
+          <table class="table table-hover mb-0">
             <thead>
               <tr>
                 <th>Family</th>
@@ -198,16 +340,15 @@
                   </td>
                   <td style="font-size:0.8125rem;">{{ placement.start_date|date:"M d, Y"|default:"—" }}</td>
                   <td>
-                    <a href="{% url 'placements:detail' placement.pk %}" class="btn btn-sm btn-outline-primary"
-                       aria-label="View placement details">
-                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    <a href="{% url 'placements:detail' placement.pk %}" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-eye"></i>
                     </a>
                   </td>
                 </tr>
               {% empty %}
                 <tr>
                   <td colspan="4" class="text-center py-4 fc-text-muted" style="font-size:0.875rem;">
-                    <i class="bi bi-inbox me-1" aria-hidden="true"></i>No placements recorded.
+                    <i class="bi bi-inbox me-1"></i>No placements recorded.
                   </td>
                 </tr>
               {% endfor %}
@@ -221,16 +362,16 @@
     <div class="col-12 col-lg-6">
       <div class="fc-table-wrapper">
         <div class="fc-table-header">
-          <h2 class="fc-table-title">
-            <i class="bi bi-cpu me-2 fc-text-primary" aria-hidden="true"></i>
+          <h2 class="fc-table-title fs-6 fw-bold">
+            <i class="bi bi-cpu me-2 fc-text-primary"></i>
             Prediction History
           </h2>
-          <a href="{% url 'predictions:create' %}?child={{ child.pk %}" class="btn btn-sm btn-primary btn-icon">
-            <i class="bi bi-plus-lg" aria-hidden="true"></i> Run New
+          <a href="{% url 'predictions:create' %}?child={{ child.pk }}" class="btn btn-sm btn-primary btn-icon">
+            <i class="bi bi-plus-lg"></i> Run New
           </a>
         </div>
         <div class="table-responsive">
-          <table class="table table-hover" aria-label="Prediction history for {{ child.first_name }}">
+          <table class="table table-hover mb-0">
             <thead>
               <tr>
                 <th>Family</th>
@@ -256,17 +397,15 @@
                   <td style="font-size:0.8125rem; color:var(--fc-text-muted);">{{ pred.model_name }}</td>
                   <td style="font-size:0.8125rem; color:var(--fc-text-muted);">{{ pred.created_at|date:"M d, Y" }}</td>
                   <td>
-                    <a href="{% url 'predictions:detail' pred.pk %}" class="btn btn-sm btn-outline-primary"
-                       aria-label="View prediction details">
-                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    <a href="{% url 'predictions:detail' pred.pk %}" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-eye"></i>
                     </a>
                   </td>
                 </tr>
               {% empty %}
                 <tr>
                   <td colspan="5" class="text-center py-4 fc-text-muted" style="font-size:0.875rem;">
-                    <i class="bi bi-inbox me-1" aria-hidden="true"></i>No predictions yet.
-                    <a href="{% url 'predictions:create' %}?child={{ child.pk %}">Run one now</a>
+                    <i class="bi bi-inbox me-1"></i>No predictions yet.
                   </td>
                 </tr>
               {% endfor %}
@@ -276,7 +415,7 @@
       </div>
     </div>
 
-  </div><!-- /.row -->
+  </div>
 
-</div><!-- /.container -->
+</div>
 {% endblock %}

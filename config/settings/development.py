@@ -28,3 +28,5 @@ LOGGING["loggers"] = {
     "apps": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
     "ml": {"handlers": ["console"], "level": "DEBUG", "propagate": False},
 }
+
+

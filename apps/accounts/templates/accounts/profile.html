@@ -148,6 +148,58 @@
         </div>
       </div>
 
+      <!-- Families created by this user -->
+      <div class="fc-card mb-4">
+        <div class="fc-card-header d-flex align-items-center justify-content-between">
+          <span><i class="bi bi-house-heart me-2 fc-text-primary" aria-hidden="true"></i>My Registered Families</span>
+          <a href="{% url 'families:create' %}" class="btn btn-sm btn-outline-success"><i class="bi bi-plus-lg me-1"></i>Add Family</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover mb-0" aria-label="My registered foster families">
+            <thead>
+              <tr>
+                <th>Family Name</th>
+                <th>Primary Applicants</th>
+                <th>Capacity</th>
+                <th>Completion</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for family in my_families %}
+                <tr>
+                  <td class="fw-semibold">
+                    <a href="{% url 'families:detail' family.pk %}" class="text-decoration-none text-dark">{{ family.family_name }}</a>
+                  </td>
+                  <td style="font-size:0.8125rem;">{{ family.primary_applicant_name }}</td>
+                  <td style="font-size:0.8125rem;">{{ family.capacity }} limit</td>
+                  <td>
+                    <span class="badge {{ family.profile_completion_score.badge_class }}">{{ family.profile_completion_score.percentage }}%</span>
+                  </td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <a href="{% url 'families:detail' family.pk %}" class="btn btn-sm btn-outline-primary" aria-label="View family details">
+                        <i class="bi bi-eye" aria-hidden="true"></i>
+                      </a>
+                      <a href="{% url 'families:update' family.pk %}" class="btn btn-sm btn-secondary" aria-label="Edit family">
+                        <i class="bi bi-pencil" aria-hidden="true"></i>
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              {% empty %}
+                <tr>
+                  <td colspan="5" class="text-center py-4 text-muted" style="font-size:0.875rem;">
+                    <i class="bi bi-house" aria-hidden="true"></i>&nbsp; No foster families added yet.
+                    <a href="{% url 'families:create' %}">Add your first family</a>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Quick actions -->
       <div class="fc-card">
         <div class="fc-card-header">
@@ -169,6 +221,9 @@
             </a>
             <a href="{% url 'accounts:settings' %}" class="btn btn-secondary btn-icon">
               <i class="bi bi-gear" aria-hidden="true"></i>Settings
+            </a>
+            <a href="{% url 'families:create' %}" class="btn btn-outline-success btn-icon">
+              <i class="bi bi-house-add-fill" aria-hidden="true"></i>Family
             </a>
           </div>
         </div>

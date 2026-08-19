@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{% if object %}Edit Placement #{{ object.pk }}{% else %}Record New Placement{% endif %}{% endblock %}
+{% block title %}{% if is_create %}Record New Placement{% else %}Edit Placement #{{ object.pk }}{% endif %} | Foster Care{% endblock %}
 
 {% block content %}
 
@@ -11,7 +11,7 @@
       <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
         <li class="breadcrumb-item"><a href="{% url 'placements:index' %}">Placements</a></li>
-        {% if object %}
+        {% if not is_create %}
           <li class="breadcrumb-item"><a href="{% url 'placements:detail' object.pk %}">Placement #{{ object.pk }}</a></li>
           <li class="breadcrumb-item active" aria-current="page">Edit</li>
         {% else %}
@@ -19,109 +19,300 @@
         {% endif %}
       </ol>
     </nav>
-    <h1 class="mt-1">{% if object %}Edit Placement Record{% else %}Record New Placement Assignment{% endif %}</h1>
-    <p class="fc-breadcrumb mt-1">
-      {% if object %}Update placement lifecycle status and notes.{% else %}Create a official placement record between a child and foster family.{% endif %}
-    </p>
+    <h1 class="mt-1">{% if is_create %}Record New Placement{% else %}Edit Placement Record{% endif %}</h1>
   </div>
 </div>
 
 <div class="container pb-5">
-  <div style="max-width:720px;">
+  <div style="max-width:780px;">
 
-    <form method="post" novalidate aria-label="Placement form">
+    <form method="post" novalidate id="placement-form">
       {% csrf_token %}
 
       {% if form.non_field_errors %}
-        <div class="alert alert-danger" role="alert">
-          <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
-          {{ form.non_field_errors }}
+        <div class="alert alert-danger mb-4" role="alert">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ form.non_field_errors }}
         </div>
       {% endif %}
 
-      <div class="fc-form-section">
-        <h2 class="fc-form-section-title">
-          <i class="bi bi-shuffle fc-text-primary" aria-hidden="true"></i>
-          Assignment Profiles
-        </h2>
-        <div class="row g-3">
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.child.id_for_label }}" class="form-label">
-              Child Record <span class="text-danger" aria-hidden="true">*</span>
-            </label>
-            {{ form.child }}
-            {% if form.child.errors %}
-              <div class="invalid-feedback d-block">{{ form.child.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.family.id_for_label }}" class="form-label">
-              Foster Family <span class="text-danger" aria-hidden="true">*</span>
-            </label>
-            {{ form.family }}
-            {% if form.family.errors %}
-              <div class="invalid-feedback d-block">{{ form.family.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-12">
-            <label for="{{ form.status.id_for_label }}" class="form-label">
-              Placement Status <span class="text-danger" aria-hidden="true">*</span>
-            </label>
-            {{ form.status }}
-            {% if form.status.errors %}
-              <div class="invalid-feedback d-block">{{ form.status.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
+      <!-- ============================================================
+           SECTION 1 — PLACEMENT ASSIGNMENT
+      ============================================================ -->
+      <div class="fc-card mb-4">
+        <div class="fc-card-header">
+          <i class="bi bi-shuffle fc-text-primary me-2" aria-hidden="true"></i>
+          Section 1 — Placement Assignment
         </div>
-      </div>
+        <div class="fc-card-body">
+          <div class="row g-3">
 
-      <div class="fc-form-section">
-        <h2 class="fc-form-section-title">
-          <i class="bi bi-calendar-range fc-text-primary" aria-hidden="true"></i>
-          Timeline &amp; Casework Notes
-        </h2>
-        <div class="row g-3">
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.start_date.id_for_label }}" class="form-label">Start Date</label>
-            {{ form.start_date }}
-            {% if form.start_date.errors %}
-              <div class="invalid-feedback d-block">{{ form.start_date.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.end_date.id_for_label }}" class="form-label">End Date</label>
-            {{ form.end_date }}
-            {% if form.end_date.errors %}
-              <div class="invalid-feedback d-block">{{ form.end_date.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
-          {% if form.disruption_reason %}
-            <div class="col-12">
-              <label for="{{ form.disruption_reason.id_for_label }}" class="form-label">Disruption Reason (If Disrupted)</label>
-              {{ form.disruption_reason }}
-              <div class="form-text">Provide clinical/casework details if status is marked Disrupted.</div>
-              {% if form.disruption_reason.errors %}
-                <div class="invalid-feedback d-block">{{ form.disruption_reason.errors.as_text }}</div>
+            <!-- Child -->
+            <div class="col-12 col-sm-6">
+              <label for="{{ form.child.id_for_label }}" class="form-label fw-semibold">
+                Child Record <span class="text-danger">*</span>
+              </label>
+              {{ form.child }}
+              {% if form.child.errors %}
+                <div class="invalid-feedback d-block">{{ form.child.errors.as_text }}</div>
               {% endif %}
             </div>
-          {% endif %}
+
+            <!-- Foster Family -->
+            <div class="col-12 col-sm-6">
+              <label for="{{ form.family.id_for_label }}" class="form-label fw-semibold">
+                Foster Family <span class="text-danger">*</span>
+              </label>
+              {{ form.family }}
+              {% if form.family.errors %}
+                <div class="invalid-feedback d-block">{{ form.family.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+
+            <!-- Prediction Reference & Compatibility Score — hidden, auto-populated from prediction -->
+            {{ form.prediction.as_hidden }}
+            {{ form.compatibility_score.as_hidden }}
+
+
+            <!-- Status -->
+            <div class="col-12 col-sm-6">
+              <label for="{{ form.status.id_for_label }}" class="form-label fw-semibold">
+                Placement Status <span class="text-danger">*</span>
+              </label>
+              {{ form.status }}
+              {% if form.status.errors %}
+                <div class="invalid-feedback d-block">{{ form.status.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Start Date -->
+            <div class="col-12 col-sm-3">
+              <label for="{{ form.start_date.id_for_label }}" class="form-label fw-semibold">
+                Placement Start Date
+              </label>
+              {{ form.start_date }}
+              {% if form.start_date.errors %}
+                <div class="invalid-feedback d-block">{{ form.start_date.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Expected End Date -->
+            <div class="col-12 col-sm-3">
+              <label for="{{ form.end_date.id_for_label }}" class="form-label fw-semibold">
+                Expected End Date
+              </label>
+              {{ form.end_date }}
+              {% if form.end_date.errors %}
+                <div class="invalid-feedback d-block">{{ form.end_date.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+          </div><!-- /row -->
+
+          <!-- Auto Summary Card -->
+          <div id="summary-card" class="mt-4" style="display:none; animation:summarySlideIn .25s ease;">
+            <div id="summary-body">
+              <!-- filled by JS -->
+            </div>
+          </div>
+
+          <style>
+            @keyframes summarySlideIn {
+              from { opacity:0; transform:translateY(-8px); }
+              to   { opacity:1; transform:translateY(0); }
+            }
+            .sc-card {
+              border: 1.5px solid var(--fc-primary, #2E7D32);
+              border-radius: 12px;
+              overflow: hidden;
+              background: #fff;
+              box-shadow: 0 2px 12px rgba(46,125,50,.08);
+            }
+            .sc-header {
+              background: linear-gradient(135deg, #2E7D32 0%, #388E3C 100%);
+              color: #fff;
+              padding: 0.75rem 1.25rem;
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              font-size: 0.875rem;
+              font-weight: 700;
+              letter-spacing: .01em;
+            }
+            .sc-body {
+              padding: 1.25rem;
+            }
+            .sc-section-label {
+              font-size: 0.7rem;
+              font-weight: 800;
+              text-transform: uppercase;
+              letter-spacing: .08em;
+              color: #2E7D32;
+              margin-bottom: 0.6rem;
+              display: flex;
+              align-items: center;
+              gap: 0.35rem;
+            }
+            .sc-row {
+              display: flex;
+              align-items: center;
+              gap: 0.5rem;
+              padding: 0.35rem 0;
+              border-bottom: 1px solid #f0f0f0;
+              font-size: 0.85rem;
+            }
+            .sc-row:last-child { border-bottom: none; }
+            .sc-row-label {
+              color: #6b7280;
+              min-width: 115px;
+              font-size: 0.8rem;
+              display: flex;
+              align-items: center;
+              gap: 0.35rem;
+            }
+            .sc-row-label i { color: #2E7D32; font-size: 0.75rem; }
+            .sc-row-value {
+              font-weight: 600;
+              color: #111;
+            }
+            .sc-divider {
+              width: 1px;
+              background: #e5e7eb;
+              align-self: stretch;
+              margin: 0 0.5rem;
+            }
+            .sc-score-bar-track {
+              height: 8px;
+              background: #e5e7eb;
+              border-radius: 99px;
+              overflow: hidden;
+              margin-top: 0.35rem;
+            }
+            .sc-score-bar-fill {
+              height: 100%;
+              border-radius: 99px;
+              transition: width .6s ease;
+            }
+            .sc-score-na {
+              color: #9ca3af;
+              font-size: 0.85rem;
+              font-style: italic;
+            }
+            @media (max-width: 575px) {
+              .sc-divider { display: none; }
+            }
+          </style>
 
         </div>
       </div>
 
-      <div class="d-flex gap-3">
+      <!-- ============================================================
+           SECTION 2 — PLACEMENT DETAILS
+      ============================================================ -->
+      <div class="fc-card mb-4">
+        <div class="fc-card-header">
+          <i class="bi bi-file-text fc-text-primary me-2" aria-hidden="true"></i>
+          Section 2 — Placement Details
+        </div>
+        <div class="fc-card-body">
+          <div class="row g-3">
+
+            <!-- Placement Type -->
+            <div class="col-12 col-sm-6">
+              <label for="{{ form.placement_type.id_for_label }}" class="form-label fw-semibold">
+                Placement Type
+              </label>
+              {{ form.placement_type }}
+              {% if form.placement_type.errors %}
+                <div class="invalid-feedback d-block">{{ form.placement_type.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Assigned Caseworker -->
+            <div class="col-12 col-sm-6">
+              <label for="{{ form.assigned_caseworker.id_for_label }}" class="form-label fw-semibold">
+                Assigned Caseworker
+              </label>
+              {{ form.assigned_caseworker }}
+              {% if form.assigned_caseworker.errors %}
+                <div class="invalid-feedback d-block">{{ form.assigned_caseworker.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Placement Notes -->
+            <div class="col-12">
+              <label for="{{ form.placement_notes.id_for_label }}" class="form-label fw-semibold">
+                Placement Notes
+              </label>
+              {{ form.placement_notes }}
+              {% if form.placement_notes.errors %}
+                <div class="invalid-feedback d-block">{{ form.placement_notes.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- ============================================================
+           SECTION 3 — PLACEMENT CLOSURE (hidden until Completed/Disrupted)
+      ============================================================ -->
+      <div class="fc-card mb-4" id="closure-section" style="display:none;">
+        <div class="fc-card-header" style="background:var(--fc-danger, #fef2f2); border-color:#fca5a5;">
+          <i class="bi bi-x-circle-fill text-danger me-2" aria-hidden="true"></i>
+          Section 3 — Placement Closure
+        </div>
+        <div class="fc-card-body">
+          <div class="alert alert-warning mb-3 py-2" style="font-size:0.85rem;">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i>
+            This section is required when the placement status is <strong>Completed</strong> or <strong>Disrupted</strong>.
+          </div>
+          <div class="row g-3">
+
+            <!-- Actual End Date -->
+            <div class="col-12 col-sm-4">
+              <label for="{{ form.actual_end_date.id_for_label }}" class="form-label fw-semibold">
+                Actual End Date <span class="text-danger" id="closure-required-star">*</span>
+              </label>
+              {{ form.actual_end_date }}
+              {% if form.actual_end_date.errors %}
+                <div class="invalid-feedback d-block">{{ form.actual_end_date.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Outcome -->
+            <div class="col-12 col-sm-8">
+              <label for="{{ form.outcome.id_for_label }}" class="form-label fw-semibold">
+                Outcome <span class="text-danger">*</span>
+              </label>
+              {{ form.outcome }}
+              {% if form.outcome.errors %}
+                <div class="invalid-feedback d-block">{{ form.outcome.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Final Notes -->
+            <div class="col-12">
+              <label for="{{ form.final_notes.id_for_label }}" class="form-label fw-semibold">
+                Final Notes
+              </label>
+              {{ form.final_notes }}
+              {% if form.final_notes.errors %}
+                <div class="invalid-feedback d-block">{{ form.final_notes.errors.as_text }}</div>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="d-flex gap-3 flex-wrap">
         <button type="submit" class="btn btn-primary btn-lg btn-icon">
           <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
-          {% if object %}Save Changes{% else %}Record Placement{% endif %}
+          {% if is_create %}Record Placement{% else %}Save Changes{% endif %}
         </button>
-        {% if object %}
+        {% if not is_create %}
           <a href="{% url 'placements:detail' object.pk %}" class="btn btn-secondary btn-lg">Cancel</a>
         {% else %}
           <a href="{% url 'placements:index' %}" class="btn btn-secondary btn-lg">Cancel</a>
@@ -129,20 +320,244 @@
       </div>
 
     </form>
-
   </div>
 </div>
 
+{% endblock %}
+
 {% block extra_scripts %}
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    document.querySelectorAll('.fc-form-section select').forEach(function (el) {
-      el.classList.add('form-select');
-    });
-    document.querySelectorAll('.fc-form-section input[type="text"], .fc-form-section input[type="date"], .fc-form-section textarea').forEach(function (el) {
-      el.classList.add('form-control');
-    });
+(function () {
+  'use strict';
+
+  const SUMMARY_API = "{% url 'placements:summary_api' %}";
+  const CLOSURE_STATUSES = ['completed', 'disrupted'];
+
+  const childSelect   = document.getElementById('id_child');
+  const familySelect  = document.getElementById('id_family');
+  const statusSelect  = document.getElementById('id_status');
+  const predSelect    = document.querySelector('[name="prediction"]');
+  const scoreInput    = document.querySelector('[name="compatibility_score"]');
+  const summaryCard   = document.getElementById('summary-card');
+  const summaryBody   = document.getElementById('summary-body');
+  const closureSection = document.getElementById('closure-section');
+
+  // Pre-populate hidden prediction field from ?prediction=<pk>
+  const urlParams = new URLSearchParams(window.location.search);
+  const predParam = urlParams.get('prediction');
+  if (predParam && predSelect) {
+    predSelect.value = predParam;
+  }
+
+  // Show/hide closure section based on status
+  function toggleClosureSection() {
+    const status = statusSelect ? statusSelect.value : '';
+    if (CLOSURE_STATUSES.includes(status)) {
+      closureSection.style.display = '';
+    } else {
+      closureSection.style.display = 'none';
+    }
+  }
+
+  // Fetch AJAX summary card
+  function fetchSummary() {
+    const childId  = childSelect ? childSelect.value : '';
+    const familyId = familySelect ? familySelect.value : '';
+    const predId   = predSelect ? predSelect.value : '';
+
+    if (!childId || !familyId) {
+      summaryCard.style.display = 'none';
+      return;
+    }
+
+    let url = SUMMARY_API + '?child_id=' + childId + '&family_id=' + familyId;
+    if (predId) url += '&prediction_id=' + predId;
+
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { summaryCard.style.display = 'none'; return; }
+
+        const c = data.child;
+        const f = data.family;
+        const p = data.prediction;
+
+        // Build score colour
+        function scoreColor(s) {
+          if (s === null) return '#9ca3af';
+          if (s >= 75) return '#16a34a';
+          if (s >= 50) return '#ca8a04';
+          return '#dc2626';
+        }
+
+        // Auto-populate hidden score field if prediction available and score blank
+        if (p && p.score !== null && (!scoreInput.value || scoreInput.value === '')) {
+          scoreInput.value = (p.score / 100).toFixed(4);
+          if (predSelect && p.pk) predSelect.value = p.pk;
+        }
+
+        const hasScore = p && p.score !== null;
+        const scoreVal = hasScore ? p.score : null;
+        const color    = scoreColor(scoreVal);
+        const barWidth = hasScore ? Math.min(scoreVal, 100) : 0;
+
+        const scoreBlock = hasScore
+          ? `<div style="display:flex;align-items:center;gap:0.75rem;">
+               <span style="font-size:1.5rem;font-weight:800;color:${color};">${scoreVal}%</span>
+               <div style="flex:1;">
+                 <div class="sc-score-bar-track">
+                   <div class="sc-score-bar-fill" style="width:${barWidth}%;background:${color};"></div>
+                 </div>
+                 <div style="font-size:0.72rem;color:#6b7280;margin-top:3px;">
+                   ${scoreVal >= 75 ? 'High Compatibility' : scoreVal >= 50 ? 'Moderate Compatibility' : 'Low Compatibility'}
+                 </div>
+               </div>
+             </div>`
+          : `<span class="sc-score-na">No prediction available for this pair</span>`;
+
+        summaryBody.innerHTML = `
+          <div class="sc-card">
+            <div class="sc-header">
+              <i class="bi bi-clipboard2-check-fill"></i>
+              Placement Summary
+            </div>
+            <div class="sc-body">
+              <div style="display:flex;gap:0;flex-wrap:wrap;">
+
+                <!-- Child column -->
+                <div style="flex:1;min-width:200px;padding-right:1rem;">
+                  <div class="sc-section-label">
+                    <i class="bi bi-person-fill"></i> Child Profile
+                  </div>
+                  <div class="sc-row">
+                    <span class="sc-row-label"><i class="bi bi-tag"></i> Full Name</span>
+                    <span class="sc-row-value">${c.name}</span>
+                  </div>
+                  <div class="sc-row">
+                    <span class="sc-row-label"><i class="bi bi-calendar3"></i> Age</span>
+                    <span class="sc-row-value">${c.age} years</span>
+                  </div>
+                  <div class="sc-row">
+                    <span class="sc-row-label"><i class="bi bi-translate"></i> Language</span>
+                    <span class="sc-row-value">${c.language}</span>
+                  </div>
+                  <div class="sc-row">
+                    <span class="sc-row-label"><i class="bi bi-heart-pulse"></i> Medical Needs</span>
+                    <span class="sc-row-value">${c.medical_needs_level}</span>
+                  </div>
+                </div>
+
+                <div class="sc-divider"></div>
+
+                <!-- Family column -->
+                <div style="flex:1;min-width:200px;padding-left:1rem;">
+                  <div class="sc-section-label">
+                    <i class="bi bi-house-heart-fill"></i> Foster Family
+                  </div>
+                  <div class="sc-row">
+                    <span class="sc-row-label"><i class="bi bi-tag"></i> Family Name</span>
+                    <span class="sc-row-value">${f.name}</span>
+                  </div>
+                  <div class="sc-row">
+                    <span class="sc-row-label"><i class="bi bi-people"></i> Capacity</span>
+                    <span class="sc-row-value">${f.capacity} children</span>
+                  </div>
+                  <div class="sc-row">
+                    <span class="sc-row-label"><i class="bi bi-house-check"></i> Housing</span>
+                    <span class="sc-row-value">${f.housing_stability}</span>
+                  </div>
+                  <div class="sc-row">
+                    <span class="sc-row-label"><i class="bi bi-award"></i> Experience</span>
+                    <span class="sc-row-value">${f.parenting_experience} yrs</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Compatibility Score bar -->
+              <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid #e5e7eb;">
+                <div class="sc-section-label" style="margin-bottom:0.5rem;">
+                  <i class="bi bi-cpu"></i> Compatibility Score
+                </div>
+                ${scoreBlock}
+              </div>
+            </div>
+          </div>`;
+
+        summaryCard.style.display = '';
+      })
+      .catch(() => { summaryCard.style.display = 'none'; });
+  }
+
+
+  // ── Date validation: Expected End Date must be strictly after Start Date ──
+  const startDateInput = document.querySelector('[name="start_date"]');
+  const endDateInput   = document.querySelector('[name="end_date"]');
+  const endDateError   = document.createElement('div');
+  endDateError.id = 'end-date-client-error';
+  endDateError.style.cssText = 'color:#dc3545;font-size:0.85rem;margin-top:0.25rem;display:none;';
+  endDateError.textContent = 'Expected End Date must be after the Placement Start Date.';
+
+  function insertEndDateError() {
+    if (endDateInput && !document.getElementById('end-date-client-error')) {
+      endDateInput.parentNode.appendChild(endDateError);
+    }
+  }
+
+  function validateDates() {
+    insertEndDateError();
+    if (!startDateInput || !endDateInput) return true;
+    const start = startDateInput.value;
+    const end   = endDateInput.value;
+    if (start && end) {
+      if (end <= start) {
+        endDateInput.classList.add('is-invalid');
+        endDateError.style.display = '';
+        return false;
+      }
+    }
+    endDateInput.classList.remove('is-invalid');
+    endDateError.style.display = 'none';
+    return true;
+  }
+
+  function updateEndDateMin() {
+    if (!startDateInput || !endDateInput) return;
+    const start = startDateInput.value;
+    if (start) {
+      // min must be the day AFTER start date
+      const d = new Date(start);
+      d.setDate(d.getDate() + 1);
+      endDateInput.min = d.toISOString().slice(0, 10);
+    } else {
+      endDateInput.removeAttribute('min');
+    }
+    validateDates();
+  }
+
+  if (startDateInput) startDateInput.addEventListener('change', updateEndDateMin);
+  if (endDateInput)   endDateInput.addEventListener('change', validateDates);
+
+  // Block form submit if dates invalid
+  document.getElementById('placement-form').addEventListener('submit', function(e) {
+    if (!validateDates()) {
+      e.preventDefault();
+      endDateInput.focus();
+    }
   });
+
+  // Init
+  insertEndDateError();
+  updateEndDateMin();
+
+  // Wire up events
+  if (childSelect)  childSelect.addEventListener('change', fetchSummary);
+  if (familySelect) familySelect.addEventListener('change', fetchSummary);
+  if (statusSelect) statusSelect.addEventListener('change', toggleClosureSection);
+
+  // Init on page load
+  toggleClosureSection();
+  fetchSummary();
+})();
 </script>
-{% endblock %}
 {% endblock %}

@@ -41,12 +41,6 @@ ENDPOINTS = [
                  "model from ml/models_store/, it does not accept a client-supplied score.",
     },
     {
-        "resource": "Reports", "base_url": "/api/v1/reports/",
-        "methods": "GET (list/retrieve) — read-only.",
-        "filters": "?file_type=&published_year=&search=",
-        "notes": "Populated by the scrape_reports management command (Step 6). Includes nested statistics.",
-    },
-    {
         "resource": "Dashboard Stats", "base_url": "/api/v1/dashboard-stats/",
         "methods": "GET",
         "filters": "—",

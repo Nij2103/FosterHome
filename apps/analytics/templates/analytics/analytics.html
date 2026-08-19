@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Analytics &amp; Insights Dashboard | Foster Care Placement Predictor{% endblock %}
+{% block meta_description %}Live real-time statistics and analytics dashboard for foster care placement insights.{% endblock %}
+
+{% block content %}
+
+<!-- Page Header -->
+<div class="fc-page-header">
+  <div class="container">
+    <nav aria-label="Breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Analytics</li>
+      </ol>
+    </nav>
+    <div class="mt-1">
+      <h1 class="mb-0">Analytics &amp; Insights Dashboard</h1>
+    </div>
+  </div>
+</div>
+
+<div class="container pb-5">
+
+  <!-- 1. Dashboard Overview Summary Cards (5 Stat Cards) -->
+  <div class="row g-3 mb-5">
+    <!-- Total Children -->
+    <div class="col-12 col-sm-6 col-md-4 col-lg">
+      <div class="fc-stat-card">
+        <div class="fc-stat-card-icon">
+          <i class="bi bi-people-fill" aria-hidden="true"></i>
+        </div>
+        <div class="fc-stat-card-body">
+          <div class="fc-stat-card-value">{{ overview.total_children }}</div>
+          <div class="fc-stat-card-label">Total Children</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Foster Families -->
+    <div class="col-12 col-sm-6 col-md-4 col-lg">
+      <div class="fc-stat-card">
+        <div class="fc-stat-card-icon">
+          <i class="bi bi-house-heart-fill" aria-hidden="true"></i>
+        </div>
+        <div class="fc-stat-card-body">
+          <div class="fc-stat-card-value">{{ overview.total_families }}</div>
+          <div class="fc-stat-card-label">Total Families</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Predictions -->
+    <div class="col-12 col-sm-6 col-md-4 col-lg">
+      <div class="fc-stat-card">
+        <div class="fc-stat-card-icon">
+          <i class="bi bi-cpu-fill" aria-hidden="true"></i>
+        </div>
+        <div class="fc-stat-card-body">
+          <div class="fc-stat-card-value">{{ overview.total_predictions }}</div>
+          <div class="fc-stat-card-label">Predictions</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total Placements -->
+    <div class="col-12 col-sm-6 col-md-4 col-lg">
+      <div class="fc-stat-card">
+        <div class="fc-stat-card-icon">
+          <i class="bi bi-shuffle" aria-hidden="true"></i>
+        </div>
+        <div class="fc-stat-card-body">
+          <div class="fc-stat-card-value">{{ overview.total_placements }}</div>
+          <div class="fc-stat-card-label">Total Placements</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Placement Success Rate -->
+    <div class="col-12 col-sm-6 col-md-4 col-lg">
+      <div class="fc-stat-card success">
+        <div class="fc-stat-card-icon">
+          <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
+        </div>
+        <div class="fc-stat-card-body">
+          <div class="fc-stat-card-value">{{ overview.placement_success_rate }}%</div>
+          <div class="fc-stat-card-label">Success Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Child Analytics Section (2 Charts) -->
+  <div class="mb-5">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="fc-feature-icon mb-0" style="width:42px;height:42px;font-size:1.25rem;">
+        <i class="bi bi-person-heart" aria-hidden="true"></i>
+      </div>
+      <div>
+        <h2 class="h5 fw-bold mb-0 text-dark">Child Demographics &amp; Needs Analytics</h2>
+        <small class="text-muted">Real-time age group distribution and linguistic diversity</small>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-lg-6">
+        <div class="fc-card h-100">
+          <div class="fc-card-header">
+            <span><i class="bi bi-bar-chart-fill text-success me-2" aria-hidden="true"></i>Age Distribution</span>
+          </div>
+          <div class="fc-card-body p-4 d-flex align-items-center justify-content-center">
+            <div class="w-100 text-center">
+              {{ child_age_svg }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="fc-card h-100">
+          <div class="fc-card-header">
+            <span><i class="bi bi-pie-chart-fill text-success me-2" aria-hidden="true"></i>Primary Language Spoken</span>
+          </div>
+          <div class="fc-card-body p-4 d-flex align-items-center justify-content-center">
+            <div class="w-100 text-center">
+              {{ child_lang_svg }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Foster Family Analytics Section (2 Charts) -->
+  <div class="mb-5">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="fc-feature-icon mb-0" style="width:42px;height:42px;font-size:1.25rem;">
+        <i class="bi bi-house-door-fill" aria-hidden="true"></i>
+      </div>
+      <div>
+        <h2 class="h5 fw-bold mb-0 text-dark">Foster Family Capacity &amp; Stability Analytics</h2>
+        <small class="text-muted">Capacity distribution and housing stability tiers</small>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-lg-6">
+        <div class="fc-card h-100">
+          <div class="fc-card-header">
+            <span><i class="bi bi-bar-chart-fill text-success me-2" aria-hidden="true"></i>Family Capacity Distribution</span>
+          </div>
+          <div class="fc-card-body p-4 d-flex align-items-center justify-content-center">
+            <div class="w-100 text-center">
+              {{ family_capacity_svg }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="fc-card h-100">
+          <div class="fc-card-header">
+            <span><i class="bi bi-pie-chart-fill text-success me-2" aria-hidden="true"></i>Housing Stability Tier</span>
+          </div>
+          <div class="fc-card-body p-4 d-flex align-items-center justify-content-center">
+            <div class="w-100 text-center">
+              {{ family_stability_svg }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Prediction Analytics Section (2 Charts) -->
+  <div class="mb-5">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="fc-feature-icon mb-0" style="width:42px;height:42px;font-size:1.25rem;">
+        <i class="bi bi-cpu-fill" aria-hidden="true"></i>
+      </div>
+      <div>
+        <h2 class="h5 fw-bold mb-0 text-dark">Machine Learning Prediction Model Analytics</h2>
+        <small class="text-muted">Compatibility score ranges and risk level distribution</small>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-lg-6">
+        <div class="fc-card h-100">
+          <div class="fc-card-header">
+            <span><i class="bi bi-bar-chart-fill text-success me-2" aria-hidden="true"></i>Compatibility Score Ranges</span>
+          </div>
+          <div class="fc-card-body p-4 d-flex align-items-center justify-content-center">
+            <div class="w-100 text-center">
+              {{ pred_score_svg }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="fc-card h-100">
+          <div class="fc-card-header">
+            <span><i class="bi bi-pie-chart-fill text-success me-2" aria-hidden="true"></i>Prediction Risk Breakdown</span>
+          </div>
+          <div class="fc-card-body p-4 d-flex align-items-center justify-content-center">
+            <div class="w-100 text-center">
+              {{ pred_risk_svg }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Placement Analytics Section (2 Charts) -->
+  <div class="mb-4">
+    <div class="d-flex align-items-center gap-3 mb-3">
+      <div class="fc-feature-icon mb-0" style="width:42px;height:42px;font-size:1.25rem;">
+        <i class="bi bi-shuffle" aria-hidden="true"></i>
+      </div>
+      <div>
+        <h2 class="h5 fw-bold mb-0 text-dark">Placement Success &amp; Longitudinal Trends</h2>
+        <small class="text-muted">Placement status breakdown and monthly historical volume</small>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-12 col-lg-6">
+        <div class="fc-card h-100">
+          <div class="fc-card-header">
+            <span><i class="bi bi-pie-chart-fill text-success me-2" aria-hidden="true"></i>Placement Status Breakdown</span>
+          </div>
+          <div class="fc-card-body p-4 d-flex align-items-center justify-content-center">
+            <div class="w-100 text-center">
+              {{ placement_status_svg }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-12 col-lg-6">
+        <div class="fc-card h-100">
+          <div class="fc-card-header">
+            <span><i class="bi bi-graph-up-arrow text-success me-2" aria-hidden="true"></i>Monthly Placement Volume Trend</span>
+          </div>
+          <div class="fc-card-body p-4 d-flex align-items-center justify-content-center">
+            <div class="w-100 text-center">
+              {{ placement_trend_svg }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

@@ -2,7 +2,7 @@
 {% load static %}
 {% load role_tags %}
 
-{% block title %}Placements Registry{% endblock %}
+{% block title %}Placements Registry | Foster Care{% endblock %}
 {% block meta_description %}Manage and audit active, proposed, completed, and disrupted foster placement decisions.{% endblock %}
 
 {% block content %}
@@ -18,12 +18,8 @@
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
       <div>
         <h1 class="mb-0">Placements Registry</h1>
-        <p class="fc-breadcrumb mt-1">Audit log of child placement assignments and outcomes</p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
-        <a href="{% url 'placements:export_csv' %}?q={{ request.GET.q }}&status={{ request.GET.status }}" class="btn btn-secondary btn-sm btn-icon" aria-label="Export placements as CSV">
-          <i class="bi bi-filetype-csv" aria-hidden="true"></i> CSV
-        </a>
         {% if request.user|can_edit %}
           <a href="{% url 'placements:create' %}" class="btn btn-primary btn-sm btn-icon">
             <i class="bi bi-plus-lg" aria-hidden="true"></i> Record Placement
@@ -40,21 +36,23 @@
   <form method="get" aria-label="Filter placements" class="mb-4">
     <div class="fc-filter-bar">
       <div class="row g-2 align-items-end">
+
         <div class="col-12 col-md-5">
           <label for="placement-search" class="form-label" style="font-size:0.8125rem; font-weight:600;">Search</label>
           <div class="fc-search-bar">
             <i class="fc-search-icon bi bi-search" aria-hidden="true"></i>
             <input type="text" id="placement-search" name="q" value="{{ request.GET.q }}"
-                   class="form-control" placeholder="Search by child or family name…" aria-label="Search placements">
+                   class="form-control" placeholder="Search by child name, family, or caseworker…"
+                   aria-label="Search placements">
           </div>
         </div>
 
         <div class="col-12 col-md-3">
-          <label for="placement-status" class="form-label" style="font-size:0.8125rem; font-weight:600;">Placement Status</label>
+          <label for="placement-status" class="form-label" style="font-size:0.8125rem; font-weight:600;">Status</label>
           <select id="placement-status" name="status" class="form-select" aria-label="Filter by placement status">
             <option value="">All Statuses</option>
-            <option value="proposed" {% if request.GET.status == 'proposed' %}selected{% endif %}>Proposed</option>
-            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+            <option value="proposed"  {% if request.GET.status == 'proposed'  %}selected{% endif %}>Proposed</option>
+            <option value="active"    {% if request.GET.status == 'active'    %}selected{% endif %}>Active</option>
             <option value="completed" {% if request.GET.status == 'completed' %}selected{% endif %}>Completed</option>
             <option value="disrupted" {% if request.GET.status == 'disrupted' %}selected{% endif %}>Disrupted</option>
           </select>
@@ -68,6 +66,7 @@
             <a href="{% url 'placements:index' %}" class="btn btn-secondary btn-sm">Clear</a>
           {% endif %}
         </div>
+
       </div>
     </div>
   </form>
@@ -90,27 +89,37 @@
       <table class="table table-hover table-striped" aria-label="Placement history table">
         <thead>
           <tr>
+            <th scope="col">#</th>
             <th scope="col">Child</th>
             <th scope="col">Foster Family</th>
+            <th scope="col">Type</th>
             <th scope="col">Status</th>
             <th scope="col">Start Date</th>
-            <th scope="col">End Date</th>
-            <th scope="col">Assigned Worker</th>
+            <th scope="col">Caseworker</th>
             <th scope="col" aria-label="Actions"></th>
           </tr>
         </thead>
         <tbody>
           {% for placement in placements %}
             <tr>
+              <td style="font-size:0.8125rem; color:var(--fc-text-muted);">#{{ placement.pk }}</td>
               <td>
                 <a href="{% url 'children:detail' placement.child.pk %}" style="font-weight:600;">
-                  {{ placement.child.first_name }}
+                  {{ placement.child.first_name }}{% if placement.child.last_name %} {{ placement.child.last_name }}{% endif %}
                 </a>
+                <div style="font-size:0.78rem; color:var(--fc-text-muted);">Age {{ placement.child.age }}</div>
               </td>
               <td>
                 <a href="{% url 'families:detail' placement.family.pk %}" style="font-weight:600;">
                   {{ placement.family.family_name }}
                 </a>
+              </td>
+              <td style="font-size:0.8125rem;">
+                {% if placement.placement_type %}
+                  <span class="badge bg-light text-dark border">{{ placement.get_placement_type_display }}</span>
+                {% else %}
+                  <span class="text-muted">—</span>
+                {% endif %}
               </td>
               <td>
                 <span class="fc-badge-{{ placement.status }} badge">
@@ -118,9 +127,8 @@
                 </span>
               </td>
               <td style="font-size:0.8125rem;">{{ placement.start_date|date:"M d, Y"|default:"—" }}</td>
-              <td style="font-size:0.8125rem;">{{ placement.end_date|date:"M d, Y"|default:"—" }}</td>
               <td style="font-size:0.8125rem; color:var(--fc-text-muted);">
-                {{ placement.placed_by.username|default:"System" }}
+                {% if placement.assigned_caseworker %}{{ placement.assigned_caseworker }}{% elif placement.placed_by %}{{ placement.placed_by.username }}{% else %}—{% endif %}
               </td>
               <td>
                 <div class="d-flex gap-1">
@@ -130,17 +138,16 @@
                   </a>
                   {% if request.user|can_edit %}
                     <a href="{% url 'placements:update' placement.pk %}"
-                       class="btn btn-sm btn-secondary" aria-label="Edit placement details">
+                       class="btn btn-sm btn-secondary" aria-label="Edit placement">
                       <i class="bi bi-pencil" aria-hidden="true"></i>
                     </a>
                   {% endif %}
                 </div>
-
               </td>
             </tr>
           {% empty %}
             <tr>
-              <td colspan="7">
+              <td colspan="8">
                 <div class="fc-empty-state">
                   <div class="fc-empty-state-icon" aria-hidden="true"><i class="bi bi-shuffle"></i></div>
                   <h3 class="fc-empty-state-title">No placements found</h3>
@@ -150,7 +157,6 @@
                       <i class="bi bi-plus-lg" aria-hidden="true"></i> Record New Placement
                     </a>
                   {% endif %}
-
                 </div>
               </td>
             </tr>
@@ -169,12 +175,12 @@
           <ul class="pagination">
             {% if page_obj.has_previous %}
               <li class="page-item">
-                <a class="page-link" href="?q={{ request.GET.q }}&status={{ request.GET.status }}&page={{ page_obj.previous_page_number }}" aria-label="Previous page">
+                <a class="page-link" href="?q={{ request.GET.q }}&status={{ request.GET.status }}&page={{ page_obj.previous_page_number }}" aria-label="Previous">
                   <i class="bi bi-chevron-left" aria-hidden="true"></i>
                 </a>
               </li>
             {% else %}
-              <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left" aria-hidden="true"></i></span></li>
+              <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-left"></i></span></li>
             {% endif %}
 
             {% for num in page_obj.paginator.page_range %}
@@ -187,12 +193,12 @@
 
             {% if page_obj.has_next %}
               <li class="page-item">
-                <a class="page-link" href="?q={{ request.GET.q }}&status={{ request.GET.status }}&page={{ page_obj.next_page_number }}" aria-label="Next page">
+                <a class="page-link" href="?q={{ request.GET.q }}&status={{ request.GET.status }}&page={{ page_obj.next_page_number }}" aria-label="Next">
                   <i class="bi bi-chevron-right" aria-hidden="true"></i>
                 </a>
               </li>
             {% else %}
-              <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right" aria-hidden="true"></i></span></li>
+              <li class="page-item disabled"><span class="page-link"><i class="bi bi-chevron-right"></i></span></li>
             {% endif %}
           </ul>
         </nav>

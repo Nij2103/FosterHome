@@ -10,10 +10,8 @@ belt-and-suspenders on top of RoleRequiredMixin on the mutating views).
 """
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db.models import Q
-from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, DetailView, ListView, UpdateView
 
@@ -21,21 +19,19 @@ from apps.accounts.models import Profile
 from apps.accounts.permissions import RoleRequiredMixin
 from apps.children.forms import ChildForm
 from apps.children.models import Child
-from apps.core.exports import export_as_csv
 
 
 def filter_children_queryset(request):
-    """
-    Shared between ChildListView.get_queryset() and the CSV/Excel export
-    views, so "export" always means "export exactly what I'm currently
-    looking at" (same search/filters applied), not a separate/inconsistent
-    query. Extracting this once is what prevents the two from drifting
-    apart as filters are added or changed in the future.
-    """
     qs = Child.objects.all()
     query = request.GET.get("q", "").strip()
     if query:
-        qs = qs.filter(Q(first_name__icontains=query) | Q(state__icontains=query))
+        qs = qs.filter(
+            Q(first_name__icontains=query) |
+            Q(last_name__icontains=query) |
+            Q(state__icontains=query) |
+            Q(caseworker_name__icontains=query) |
+            Q(legal_status__icontains=query)
+        )
 
     state = request.GET.get("state")
     if state:
@@ -61,20 +57,6 @@ def filter_children_queryset(request):
     return qs
 
 
-CHILD_EXPORT_COLUMNS = [
-    ("First Name", lambda c: c.first_name),
-    ("Age", lambda c: c.age),
-    ("Gender", lambda c: c.get_gender_display()),
-    ("State", lambda c: c.state),
-    ("Special Needs", lambda c: "Yes" if c.special_needs else "No"),
-    ("Sibling Group Size", lambda c: c.sibling_group_size),
-    ("Behavioral Score", lambda c: c.behavioral_notes_score),
-    ("Education Level", lambda c: c.education_level),
-    ("Time in Care (months)", lambda c: c.time_in_care_months),
-    ("Placed", lambda c: "Yes" if c.is_placed else "No"),
-]
-
-
 class ChildListView(LoginRequiredMixin, ListView):
     model = Child
     template_name = "children/child_list.html"
@@ -89,12 +71,6 @@ class ChildListView(LoginRequiredMixin, ListView):
         context["states"] = Child.objects.values_list("state", flat=True).distinct().order_by("state")
         context["query_params"] = self.request.GET.urlencode()
         return context
-
-
-@login_required
-def export_children_csv(request):
-    qs = filter_children_queryset(request)
-    return export_as_csv(qs, CHILD_EXPORT_COLUMNS, "children_export")
 
 
 class ChildDetailView(LoginRequiredMixin, DetailView):
@@ -114,7 +90,7 @@ class ChildCreateView(RoleRequiredMixin, LoginRequiredMixin, CreateView):
     form_class = ChildForm
     template_name = "children/child_form.html"
     success_url = reverse_lazy("children:index")
-    allowed_roles = (Profile.Role.ADMIN, Profile.Role.CASEWORKER)
+    allowed_roles = (Profile.Role.ADMIN, Profile.Role.CASEWORKER, Profile.Role.VIEWER)
 
     def form_valid(self, form):
         messages.success(self.request, f"Child record for {form.instance.first_name} created.")

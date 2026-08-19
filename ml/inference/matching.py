@@ -6,17 +6,14 @@ Smart Matching Recommendations Engine.
 Provides candidate filtering and ranking functions to recommend suitable
 foster care placement matches for a given child or foster family.
 
-RULES & CONSTRAINTS:
-1. Hard Constraints (Unsuitable pairs are strictly filtered out):
-   - Capacity Check: Foster family must have current_occupancy < capacity.
-   - Special Needs Check: If child.special_needs is True, family.accepts_special_needs MUST be True.
-   - Sibling Group Check: If child.sibling_group_size > 1, family.accepts_sibling_groups MUST be True.
-   - Active Status Check: Foster family must be active (is_active=True).
-   - Placement Status Check: Child must not already be placed (is_placed=False).
-2. ML Compatibility Threshold:
-   - Evaluates ML model compatibility prediction score for all candidate pairs passing hard constraints.
-   - Filters out candidates with compatibility_score < min_score (default 0.50).
-   - Ranks remaining suitable candidates in descending order of compatibility score.
+PRODUCTION RULES & CONSTRAINTS:
+1. Hard Cultural & Language Safety Filters:
+   - Pre-filters critical language barriers where family cannot accommodate child's language.
+2. Strict Sibling Group Integrity:
+   - Family available capacity MUST be >= child's sibling group size (no splitting sibling groups).
+   - If sibling_group_size > 1, family.accepts_sibling_groups MUST be True.
+3. Capacity Check & Special Needs Pre-filters.
+4. ML Compatibility Threshold & Ranking.
 """
 
 from typing import Any, Dict, List, Optional
@@ -25,32 +22,63 @@ from apps.families.models import FosterFamily
 from ml.inference.predict import predict_compatibility, ModelNotTrainedError
 
 
+def check_language_cultural_compatibility(child: Child, family: FosterFamily) -> bool:
+    """
+    Hard Pre-Filter Rule 1: Checks for critical language & cultural barriers.
+    If the child requires a specific primary language accommodation,
+    the foster family's language profile must accommodate it.
+    """
+    child_text = f"{child.case_notes} {child.ethnicity} {child.nationality} {getattr(child, 'languages_spoken', '')} {child.dietary_preferences}".lower()
+    family_langs = [lang.strip().lower() for lang in family.languages_spoken.split(",") if lang.strip()]
+
+    # Specific non-English primary language indicators
+    critical_languages = {
+        "spanish": ["spanish", "espanol", "español"],
+        "french": ["french", "francais", "français"],
+        "vietnamese": ["vietnamese"],
+        "hindi": ["hindi"],
+        "asl": ["asl", "sign language"],
+    }
+
+    for lang_key, keywords in critical_languages.items():
+        if any(kw in child_text for kw in keywords):
+            # Child requires this language accommodation
+            family_has_lang = any(
+                any(kw in fam_lang for kw in keywords) for fam_lang in family_langs
+            )
+            if not family_has_lang:
+                return False  # Critical language barrier flagged
+
+    return True
+
+
 def find_suitable_matches_for_child(
     child: Child,
     min_score: float = 0.40,
     max_results: int = 10,
 ) -> List[Dict[str, Any]]:
-
     """
     Finds and ranks suitable candidate Foster Families for a given Child.
     Returns a list of dicts with family info, compatibility score, and match badge.
     """
-    # Query candidate active families with capacity
     candidate_families = FosterFamily.objects.filter(is_active=True)
-
     suitable_matches = []
 
     for family in candidate_families:
-        # Hard Constraint 1: Capacity check
-        if family.current_occupancy >= family.capacity:
+        # Rule 2: Strict Sibling Group Integrity & Capacity Check
+        available_slots = family.capacity - family.current_occupancy
+        if available_slots < child.sibling_group_size:
+            continue  # Do not allow splitting sibling groups
+
+        if child.sibling_group_size > 1 and not family.accepts_sibling_groups:
             continue
 
-        # Hard Constraint 2: Special needs check
+        # Hard Constraint: Special needs check
         if child.special_needs and not family.accepts_special_needs:
             continue
 
-        # Hard Constraint 3: Sibling group check
-        if child.sibling_group_size > 1 and not family.accepts_sibling_groups:
+        # Rule 1: Hard Cultural & Language Safety Filter
+        if not check_language_cultural_compatibility(child, family):
             continue
 
         # Run ML inference
@@ -58,9 +86,13 @@ def find_suitable_matches_for_child(
             result = predict_compatibility(child, family)
             score = float(result["compatibility_score"])
         except Exception:
-            # Fallback score estimation based on domain heuristics if model isn't trained or in test env
-            score = 0.75
-
+            from ml.inference.predict import compute_compatibility_features
+            feats = compute_compatibility_features(child, family)
+            score = feats["composite_score"]
+            result = {
+                "compatibility_score": score,
+                "explanation": {"summary_text": f"Compatibility score: {int(score*100)}%"},
+            }
 
         # ML Compatibility Threshold check
         if score < min_score:
@@ -92,7 +124,6 @@ def find_suitable_matches_for_child(
             "explanation_summary": result.get("explanation", {}).get("summary_text", "") if isinstance(result, dict) else "",
         })
 
-    # Sort candidates by compatibility score descending
     suitable_matches.sort(key=lambda x: x["compatibility_score"], reverse=True)
     return suitable_matches[:max_results]
 
@@ -102,27 +133,31 @@ def find_suitable_matches_for_family(
     min_score: float = 0.40,
     max_results: int = 10,
 ) -> List[Dict[str, Any]]:
-
     """
     Finds and ranks suitable candidate Children for a given Foster Family.
     Returns a list of dicts with child info, compatibility score, and match badge.
     """
-    # Check if family has capacity available
-    if family.current_occupancy >= family.capacity:
+    available_slots = family.capacity - family.current_occupancy
+    if available_slots <= 0:
         return []
 
-    # Query candidate children (unplaced)
     candidate_children = Child.objects.filter(is_placed=False)
-
     suitable_matches = []
 
     for child in candidate_children:
-        # Hard Constraint 1: Special needs check
+        # Rule 2: Strict Sibling Group Integrity & Capacity Check
+        if available_slots < child.sibling_group_size:
+            continue
+
+        if child.sibling_group_size > 1 and not family.accepts_sibling_groups:
+            continue
+
+        # Hard Constraint: Special needs check
         if child.special_needs and not family.accepts_special_needs:
             continue
 
-        # Hard Constraint 2: Sibling group check
-        if child.sibling_group_size > 1 and not family.accepts_sibling_groups:
+        # Rule 1: Hard Cultural & Language Safety Filter
+        if not check_language_cultural_compatibility(child, family):
             continue
 
         # Run ML inference
@@ -130,8 +165,13 @@ def find_suitable_matches_for_family(
             result = predict_compatibility(child, family)
             score = float(result["compatibility_score"])
         except Exception:
-            score = 0.75
-
+            from ml.inference.predict import compute_compatibility_features
+            feats = compute_compatibility_features(child, family)
+            score = feats["composite_score"]
+            result = {
+                "compatibility_score": score,
+                "explanation": {"summary_text": f"Compatibility score: {int(score*100)}%"},
+            }
 
         # ML Compatibility Threshold check
         if score < min_score:

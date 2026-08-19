@@ -21,26 +21,17 @@ from apps.children.models import Child
 from apps.families.models import FosterFamily
 from apps.placements.models import Placement
 from apps.predictions.models import Prediction
-from apps.reports.models import Report, ReportStatistic
-
-
-class Command(BaseCommand):
-    help = "Create the Admin, Case Worker, and Viewer groups with appropriate model permissions."
-
-    def handle(self, *args, **options):
-        # --- Case Worker: full CRUD on operational data, read-only on reports ---
+        # --- Case Worker: full CRUD on operational data ---
         caseworker_group, _ = Group.objects.get_or_create(name="Case Worker")
         caseworker_perms = []
         for model in [Child, FosterFamily, Placement, Prediction]:
             caseworker_perms += self._perms_for(model, ["add", "change", "view", "delete"])
-        for model in [Report, ReportStatistic]:
-            caseworker_perms += self._perms_for(model, ["view"])
         caseworker_group.permissions.set(caseworker_perms)
 
         # --- Viewer: read-only everywhere, no create/edit/delete ---
         viewer_group, _ = Group.objects.get_or_create(name="Viewer")
         viewer_perms = []
-        for model in [Child, FosterFamily, Placement, Prediction, Report, ReportStatistic]:
+        for model in [Child, FosterFamily, Placement, Prediction]:
             viewer_perms += self._perms_for(model, ["view"])
         viewer_group.permissions.set(viewer_perms)
 

@@ -21,15 +21,15 @@
     </nav>
     <h1 class="mt-1">{% if object %}Edit Foster Family Record{% else %}Register New Foster Family{% endif %}</h1>
     <p class="fc-breadcrumb mt-1">
-      {% if object %}Update home information and capacity preferences.{% else %}Register an approved foster home into the system.{% endif %}
+      {% if object %}Update licensing status and contact preferences for {{ object.family_name }}.{% else %}Register an approved foster family into the welfare system.{% endif %}
     </p>
   </div>
 </div>
 
 <div class="container pb-5">
-  <div style="max-width:720px;">
+  <div style="max-width:850px;">
 
-    <form method="post" novalidate aria-label="{% if object %}Edit family{% else %}Add family{% endif %} form">
+    <form method="post" enctype="multipart/form-data" novalidate aria-label="{% if object %}Edit family{% else %}Add family{% endif %} form">
       {% csrf_token %}
 
       {% if form.non_field_errors %}
@@ -39,154 +39,262 @@
         </div>
       {% endif %}
 
-      <!-- Section 1: Basic Information -->
+      <!-- Section 1: MANDATORY FIELDS -->
       <div class="fc-form-section">
-        <h2 class="fc-form-section-title">
-          <i class="bi bi-house-heart fc-text-primary" aria-hidden="true"></i>
-          Family Profile &amp; Location
-        </h2>
-        <div class="row g-3">
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.family_name.id_for_label }}" class="form-label">
-              Family Name <span class="text-danger" aria-hidden="true">*</span>
-            </label>
-            <input type="text" id="{{ form.family_name.id_for_label }}"
-                   name="{{ form.family_name.html_name }}"
-                   class="form-control {% if form.family_name.errors %}is-invalid{% endif %}"
-                   value="{{ form.family_name.value|default:'' }}"
-                   placeholder="e.g. Miller Family" required>
-            <div class="form-text">Synthetic name identifier only.</div>
-            {% if form.family_name.errors %}
-              <div class="invalid-feedback">{{ form.family_name.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.state.id_for_label }}" class="form-label">
-              State <span class="text-danger" aria-hidden="true">*</span>
-            </label>
-            <input type="text" id="{{ form.state.id_for_label }}"
-                   name="{{ form.state.html_name }}"
-                   class="form-control {% if form.state.errors %}is-invalid{% endif %}"
-                   value="{{ form.state.value|default:'' }}"
-                   placeholder="e.g. California" required>
-            {% if form.state.errors %}
-              <div class="invalid-feedback">{{ form.state.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.home_type.id_for_label }}" class="form-label">
-              Home Setting <span class="text-danger" aria-hidden="true">*</span>
-            </label>
-            <select id="{{ form.home_type.id_for_label }}"
-                    name="{{ form.home_type.html_name }}"
-                    class="form-select {% if form.home_type.errors %}is-invalid{% endif %}" required>
-              <option value="">Select setting…</option>
-              <option value="urban" {% if form.home_type.value == 'urban' %}selected{% endif %}>Urban</option>
-              <option value="suburban" {% if form.home_type.value == 'suburban' %}selected{% endif %}>Suburban</option>
-              <option value="rural" {% if form.home_type.value == 'rural' %}selected{% endif %}>Rural</option>
-            </select>
-            {% if form.home_type.errors %}
-              <div class="invalid-feedback">{{ form.home_type.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.experience_years.id_for_label }}" class="form-label">
-              Experience (Years) <span class="text-danger" aria-hidden="true">*</span>
-            </label>
-            <input type="number" id="{{ form.experience_years.id_for_label }}"
-                   name="{{ form.experience_years.html_name }}"
-                   class="form-control {% if form.experience_years.errors %}is-invalid{% endif %}"
-                   value="{{ form.experience_years.value|default:'0' }}"
-                   min="0" required>
-            {% if form.experience_years.errors %}
-              <div class="invalid-feedback">{{ form.experience_years.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+          <h2 class="fc-form-section-title mb-0">
+            <i class="bi bi-house-heart-fill fc-text-primary" aria-hidden="true"></i>
+            Mandatory Foster Family &amp; Licensing Details
+          </h2>
+          <span class="badge bg-danger-subtle text-danger fw-semibold px-2.5 py-1">Required</span>
         </div>
-      </div>
 
-      <!-- Section 2: Capacity & Preferences -->
-      <div class="fc-form-section">
-        <h2 class="fc-form-section-title">
-          <i class="bi bi-people fc-text-primary" aria-hidden="true"></i>
-          Capacity &amp; Preferences
-        </h2>
         <div class="row g-3">
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.capacity.id_for_label }}" class="form-label">
-              Total Capacity <span class="text-danger" aria-hidden="true">*</span>
+          <!-- Applicants & Identifiers -->
+          <div class="col-12 col-md-6">
+            <label for="{{ form.family_name.id_for_label }}" class="form-label">
+              Family Name <span class="text-danger">*</span>
             </label>
-            <input type="number" id="{{ form.capacity.id_for_label }}"
-                   name="{{ form.capacity.html_name }}"
-                   class="form-control {% if form.capacity.errors %}is-invalid{% endif %}"
-                   value="{{ form.capacity.value|default:'1' }}"
-                   min="1" required>
-            <div class="form-text">Maximum children hostable at one time.</div>
-            {% if form.capacity.errors %}
-              <div class="invalid-feedback">{{ form.capacity.errors.as_text }}</div>
+            {{ form.family_name }}
+            {% if form.family_name.errors %}
+              <div class="invalid-feedback d-block">{{ form.family_name.errors.as_text }}</div>
             {% endif %}
           </div>
 
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.current_occupancy.id_for_label }}" class="form-label">
-              Current Occupancy <span class="text-danger" aria-hidden="true">*</span>
+          <div class="col-12 col-md-6">
+            <label for="{{ form.primary_applicant_name.id_for_label }}" class="form-label">
+              Primary Applicant Name(s) <span class="text-danger">*</span>
             </label>
-            <input type="number" id="{{ form.current_occupancy.id_for_label }}"
-                   name="{{ form.current_occupancy.html_name }}"
-                   class="form-control {% if form.current_occupancy.errors %}is-invalid{% endif %}"
-                   value="{{ form.current_occupancy.value|default:'0' }}"
-                   min="0" required>
-            {% if form.current_occupancy.errors %}
-              <div class="invalid-feedback">{{ form.current_occupancy.errors.as_text }}</div>
+            {{ form.primary_applicant_name }}
+            <div class="form-text">Full legal name(s) of the primary foster parent(s).</div>
+            {% if form.primary_applicant_name.errors %}
+              <div class="invalid-feedback d-block">{{ form.primary_applicant_name.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Contact Details -->
+          <div class="col-12 col-md-4">
+            <label for="{{ form.phone_number.id_for_label }}" class="form-label">
+              Phone Number <span class="text-danger">*</span>
+            </label>
+            <div class="input-group">
+              <span class="input-group-text fw-bold bg-light text-secondary">+91</span>
+              {{ form.phone_number }}
+            </div>
+            {% if form.phone_number.errors %}
+              <div class="invalid-feedback d-block">{{ form.phone_number.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.email_address.id_for_label }}" class="form-label">
+              Email Address <span class="text-danger">*</span>
+            </label>
+            {{ form.email_address }}
+            {% if form.email_address.errors %}
+              <div class="invalid-feedback d-block">{{ form.email_address.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.identity_document.id_for_label }}" class="form-label">
+              Identity Document Image <span class="text-danger">*</span>
+            </label>
+            {{ form.identity_document }}
+            <div class="form-text">Upload or capture photo of ID card (Driver License / Passport / Govt ID).</div>
+            {% if form.identity_document.errors %}
+              <div class="invalid-feedback d-block">{{ form.identity_document.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.languages_spoken.id_for_label }}" class="form-label">
+              Languages Spoken <span class="text-danger">*</span>
+            </label>
+            {{ form.languages_spoken }}
+            {% if form.languages_spoken.errors %}
+              <div class="invalid-feedback d-block">{{ form.languages_spoken.errors.as_text }}</div>
             {% endif %}
           </div>
 
           <div class="col-12">
-            <div class="d-flex flex-column gap-3 pt-2">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox"
-                       id="{{ form.accepts_special_needs.id_for_label }}"
-                       name="{{ form.accepts_special_needs.html_name }}"
-                       {% if form.accepts_special_needs.value %}checked{% endif %}>
-                <label class="form-check-label" for="{{ form.accepts_special_needs.id_for_label }}">
-                  Accepts Children with Special Needs
-                </label>
-              </div>
+            <label for="{{ form.residential_address.id_for_label }}" class="form-label">
+              Residential Address <span class="text-danger">*</span>
+            </label>
+            {{ form.residential_address }}
+            {% if form.residential_address.errors %}
+              <div class="invalid-feedback d-block">{{ form.residential_address.errors.as_text }}</div>
+            {% endif %}
+          </div>
 
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox"
-                       id="{{ form.accepts_sibling_groups.id_for_label }}"
-                       name="{{ form.accepts_sibling_groups.html_name }}"
-                       {% if form.accepts_sibling_groups.value %}checked{% endif %}>
-                <label class="form-check-label" for="{{ form.accepts_sibling_groups.id_for_label }}">
-                  Accepts Sibling Groups (Joint Placements)
-                </label>
-              </div>
+          <!-- Capacity -->
+          <div class="col-12 col-md-4">
+            <label for="{{ form.capacity.id_for_label }}" class="form-label">
+              Home Capacity <span class="text-danger">*</span>
+            </label>
+            {{ form.capacity }}
+            <div class="form-text">Maximum foster children allowed.</div>
+            {% if form.capacity.errors %}
+              <div class="invalid-feedback d-block">{{ form.capacity.errors.as_text }}</div>
+            {% endif %}
+          </div>
 
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox"
-                       id="{{ form.is_active.id_for_label }}"
-                       name="{{ form.is_active.html_name }}"
-                       {% if form.is_active.value or not object %}checked{% endif %}>
-                <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
-                  Active for New Placements
-                </label>
-                <div class="form-text">Inactive homes are excluded from placement algorithms.</div>
-              </div>
-            </div>
+          <!-- Licensing & Background Clearances -->
+          <div class="col-12 col-md-6">
+            <label for="{{ form.license_status.id_for_label }}" class="form-label">
+              License Status <span class="text-danger">*</span>
+            </label>
+            {{ form.license_status }}
+            {% if form.license_status.errors %}
+              <div class="invalid-feedback d-block">{{ form.license_status.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.background_clearance_status.id_for_label }}" class="form-label">
+              Mandatory Background Clearances <span class="text-danger">*</span>
+            </label>
+            {{ form.background_clearance_status }}
+            <div class="form-text">Confirmation of criminal record checks, fingerprinting, and abuse registry.</div>
+            {% if form.background_clearance_status.errors %}
+              <div class="invalid-feedback d-block">{{ form.background_clearance_status.errors.as_text }}</div>
+            {% endif %}
           </div>
 
         </div>
       </div>
 
+      <!-- Section 2: HOUSEHOLD DEMOGRAPHICS & PREFERENCES -->
+      <div class="fc-form-section mt-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+          <h2 class="fc-form-section-title mb-0">
+            <i class="bi bi-card-checklist fc-text-primary" aria-hidden="true"></i>
+            Household Demographics &amp; Placement Preferences
+          </h2>
+          <span class="badge bg-light text-dark border fw-normal px-2.5 py-1">Optional</span>
+        </div>
+
+        <div class="row g-3">
+          <!-- Marital Status & Household Composition -->
+          <div class="col-12 col-md-6">
+            <label for="{{ form.marital_status.id_for_label }}" class="form-label">Marital Status</label>
+            {{ form.marital_status }}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.household_composition.id_for_label }}" class="form-label">Household Composition</label>
+            {{ form.household_composition }}
+          </div>
+
+          <!-- Age, Gender, Special Needs & Sibling Preferences -->
+          <div class="col-12 col-md-4">
+            <label for="{{ form.preferred_age_group.id_for_label }}" class="form-label">Preferred Child Age Group</label>
+            {{ form.preferred_age_group }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.preferred_gender.id_for_label }}" class="form-label">Preferred Gender</label>
+            {{ form.preferred_gender }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.preferred_special_needs.id_for_label }}" class="form-label">Preferred Special Needs Category</label>
+            {{ form.preferred_special_needs }}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.accept_sibling_placements.id_for_label }}" class="form-label">Accept Sibling Placements</label>
+            {{ form.accept_sibling_placements }}
+          </div>
+
+          <div class="col-12 col-md-6">
+            <label for="{{ form.max_sibling_group_accepted.id_for_label }}" class="form-label">Max Sibling Group Accepted</label>
+            {{ form.max_sibling_group_accepted }}
+          </div>
+
+          <!-- Special Training Checkboxes -->
+          <div class="col-12">
+            <label class="form-label fw-bold">Special Training &amp; Certifications</label>
+            <div class="row g-2">
+              {% for checkbox in form.special_trainings_list %}
+                <div class="col-12 col-md-4">
+                  <div class="form-check card p-2.5 h-100 mb-0 shadow-sm border">
+                    <label class="form-check-label w-100 cursor-pointer d-flex align-items-center gap-2 mb-0">
+                      {{ checkbox.tag }}
+                      <span class="fw-medium text-dark">{{ checkbox.choice_label }}</span>
+                    </label>
+                  </div>
+                </div>
+              {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: FAMILY PLACEMENT ASSESSMENT -->
+      <div class="fc-form-section mt-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+          <h2 class="fc-form-section-title mb-0">
+            <i class="bi bi-shield-check fc-text-primary" aria-hidden="true"></i>
+            Family Placement Assessment
+          </h2>
+          <span class="badge bg-light text-dark border fw-normal px-2.5 py-1">Assessment</span>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-12 col-md-4">
+            <label for="{{ form.behavioral_support_capacity.id_for_label }}" class="form-label">Behavioral Support Capacity</label>
+            {{ form.behavioral_support_capacity }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.mental_health_support_capacity.id_for_label }}" class="form-label">Mental Health Support Capacity</label>
+            {{ form.mental_health_support_capacity }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.medical_support_capacity.id_for_label }}" class="form-label">Medical Support Capacity</label>
+            {{ form.medical_support_capacity }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.parenting_experience_years.id_for_label }}" class="form-label">Parenting Experience (Years)</label>
+            {{ form.parenting_experience_years }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.previous_foster_placements_count.id_for_label }}" class="form-label">Previous Foster Placements</label>
+            {{ form.previous_foster_placements_count }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.successful_foster_placements_count.id_for_label }}" class="form-label">Successful Foster Placements</label>
+            {{ form.successful_foster_placements_count }}
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label for="{{ form.housing_stability.id_for_label }}" class="form-label">Housing Stability</label>
+            {{ form.housing_stability }}
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label for="{{ form.family_support_network.id_for_label }}" class="form-label">Family Support Network</label>
+            {{ form.family_support_network }}
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label for="{{ form.long_term_placement_willingness.id_for_label }}" class="form-label">Long-Term Placement Willingness</label>
+            {{ form.long_term_placement_willingness }}
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label for="{{ form.therapy_support_availability.id_for_label }}" class="form-label">Therapy Support Availability</label>
+            {{ form.therapy_support_availability }}
+          </div>
+        </div>
+      </div>
+
       <!-- Actions -->
-      <div class="d-flex gap-3">
+      <div class="d-flex gap-3 mt-4">
         <button type="submit" class="btn btn-primary btn-lg btn-icon">
           <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
           {% if object %}Save Changes{% else %}Register Family{% endif %}

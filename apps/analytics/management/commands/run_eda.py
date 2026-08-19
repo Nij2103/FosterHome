@@ -21,7 +21,6 @@ from django.core.management.base import BaseCommand
 from apps.children.models import Child
 from apps.families.models import FosterFamily
 from apps.placements.models import Placement
-from apps.reports.models import ReportStatistic
 from ml.eda.eda_report import (
     correlation_matrix,
     distribution_stats,
@@ -68,7 +67,7 @@ class Command(BaseCommand):
             })
         placements_df = pd.DataFrame(placement_rows)
 
-        stats_df = pd.DataFrame(list(ReportStatistic.objects.values()))
+        stats_df = pd.DataFrame()
 
         self.stdout.write("Running EDA...")
         report_lines = ["# Exploratory Data Analysis Summary", ""]

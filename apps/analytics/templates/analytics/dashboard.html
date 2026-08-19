@@ -14,19 +14,9 @@
         <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
       </ol>
     </nav>
-    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mt-1">
-      <div>
-        <h1 class="mb-0">Placement System Dashboard</h1>
-        <p class="fc-breadcrumb mt-1">System overview &amp; real-time operational indicators</p>
-      </div>
-      <div class="d-flex gap-2 flex-wrap">
-        <a href="{% url 'analytics:export_dashboard_pdf' %}" class="btn btn-secondary btn-sm btn-icon" aria-label="Export dashboard summary as PDF">
-          <i class="bi bi-file-earmark-pdf-fill text-danger" aria-hidden="true"></i> Summary PDF
-        </a>
-        <a href="{% url 'predictions:create' %}" class="btn btn-primary btn-sm btn-icon">
-          <i class="bi bi-cpu" aria-hidden="true"></i> Run Prediction
-        </a>
-      </div>
+    <div class="mt-1">
+      <h1 class="mb-0">Placement System Dashboard</h1>
+      <p class="fc-breadcrumb mt-1">System overview &amp; real-time operational indicators</p>
     </div>
   </div>
 </div>
@@ -131,33 +121,6 @@
       </div>
     </div>
   </div>
-
-  <!-- Highlight Visualizations Gallery -->
-  {% if highlight_charts %}
-    <div class="mb-5">
-      <div class="d-flex align-items-center justify-content-between mb-3">
-        <h2 class="fc-section-title mb-0" style="font-size:1.375rem;">
-          <i class="bi bi-bar-chart-line-fill me-2 fc-text-primary" aria-hidden="true"></i>
-          Key System Visualizations
-        </h2>
-        <a href="{% url 'analytics:visualizations' %}" class="btn btn-sm btn-outline-primary">
-          View All Visualizations <i class="bi bi-arrow-right ms-1" aria-hidden="true"></i>
-        </a>
-      </div>
-      <div class="row g-3">
-        {% for chart in highlight_charts %}
-          <div class="col-12 col-md-6 col-lg-3">
-            <div class="fc-chart-card">
-              <div class="fc-chart-card-header text-truncate">
-                {{ chart|cut:".png" }}
-              </div>
-              <img src="/media/analytics/charts/{{ chart }}" alt="Chart image {{ chart }}" loading="lazy">
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    </div>
-  {% endif %}
 
   <!-- Tables Section -->
   <div class="row g-4">

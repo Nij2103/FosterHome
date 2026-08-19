@@ -1,50 +1,23 @@
-asgiref==3.12.1
-beautifulsoup4==4.15.0
-certifi==2026.7.22
-cffi==2.1.0
-charset-normalizer==3.4.9
-contourpy==1.3.3
-cryptography==49.0.0
-cycler==0.12.1
-Django==6.0.7
-django-filter==26.1
-djangorestframework==3.16.1
-et_xmlfile==2.0.0
-fonttools==4.63.0
-idna==3.18
-joblib==1.5.3
-kiwisolver==1.5.0
-matplotlib==3.11.1
-narwhals==2.24.0
-numpy==2.5.1
+# Core Web Framework & Security
+Django==6.0.7              # Core web framework (ORM, admin, forms, auth, templating engine)
+django-filter==26.1        # Enables filtering on list views and REST API endpoints
+djangorestframework==3.16.1 # REST API engine powering /api/v1/ endpoints & serializers
 
-packaging==26.2
-pandas==3.0.5
-patsy==1.0.2
-pdfminer.six==20260107
-pdfplumber==0.11.10
-pillow==12.3.0
-pycparser==3.0
-pyparsing==3.3.2
-pypdfium2==5.12.1
-python-dateutil==2.9.0.post0
-python-dotenv==1.2.2
-reportlab==5.0.0
-requests==2.34.2
-scikit-learn==1.9.0
-scipy==1.18.0
-seaborn==0.13.2
-six==1.17.0
-soupsieve==2.9.1
-sqlparse==0.5.5
-statsmodels==0.14.6
-tabulate==0.10.0
-threadpoolctl==3.6.0
-typing_extensions==4.16.0
-urllib3==2.7.0
-xgboost==3.3.0
-shap==0.52.0
+# Data Science & Machine Learning Pipeline
+scikit-learn==1.9.0        # Machine Learning models (Random Forest, Gradient Boosting, Logistic Regression)
+xgboost==3.3.0             # Advanced Gradient Boosted Decision Tree classification algorithms
+shap==0.52.0               # Explainable AI (XAI) engine for ML prediction feature attributions
+pandas==3.0.5              # Data manipulation and DataFrame processing for ML features
+numpy==2.5.1               # High-performance multi-dimensional numerical array calculations
+scipy==1.18.0              # Scientific computing library for statistical computations and matrices
+joblib==1.5.3              # Model serialization engine for loading/saving trained .joblib ML models
 
+# Analytics & Data Visualization
+matplotlib==3.11.1         # Charting engine for dynamic SVG placement & analytics visualizations
+seaborn==0.13.2            # Statistical data visualization library for demographic distribution plots
+pillow==12.3.0             # Image processing library required by Django ImageField for profile uploads
 
-# Optional deep learning comparison model
-tensorflow-cpu; python_version < "3.14"
+# System Utilities & Integration
+python-dotenv==1.2.2       # Loads environment variables from .env files into Django settings
+requests==2.34.2           # HTTP client library for external network API requests
+tabulate==0.10.0           # Formats clean evaluation summary tables in ML training CLI scripts

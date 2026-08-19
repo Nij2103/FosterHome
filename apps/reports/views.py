@@ -11,26 +11,12 @@ worker or time out the request. That's noted in the Future Scope section
 of the project docs, not silently glossed over.
 """
 
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.core.management import call_command
 from django.db.models import Q
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect
 from django.views.generic import DetailView, ListView
 
-from apps.accounts.models import Profile
-from apps.accounts.permissions import role_required
-from apps.core.exports import export_as_csv
-from apps.reports.models import Report, ReportStatistic
-
-REPORT_STATISTIC_EXPORT_COLUMNS = [
-    ("Report", lambda s: s.report.title),
-    ("State", lambda s: s.state),
-    ("Year", lambda s: s.year),
-    ("Metric", lambda s: s.metric_name),
-    ("Value", lambda s: s.value),
-]
+from apps.reports.models import Report
 
 
 class ReportListView(LoginRequiredMixin, ListView):
@@ -61,26 +47,3 @@ class ReportDetailView(LoginRequiredMixin, DetailView):
         context["text_preview"] = (self.object.parsed_text or "")[:2000]
         return context
 
-
-@role_required("admin")
-def trigger_scrape(request):
-    if request.method != "POST":
-        return redirect("reports:index")
-    try:
-        call_command("scrape_reports", local_dir="ml/scraping/fixtures")
-        messages.success(request, "Scrape complete — fixture reports re-ingested. "
-                                   "(Live scraping from this UI is limited to the "
-                                   "bundled fixtures; run `python manage.py scrape_reports` "
-                                   "from the command line for live sources.)")
-    except Exception as exc:
-        messages.error(request, f"Scrape failed: {exc}")
-    return redirect("reports:index")
-
-
-@login_required
-def export_statistics_csv(request):
-    """Exports all extracted ReportStatistic rows — the real scraped
-    AFCARS data from Step 6 — as a CSV, ready for further analysis in
-    Excel/Pandas outside the app."""
-    qs = ReportStatistic.objects.select_related("report").order_by("state", "year", "metric_name")
-    return export_as_csv(qs, REPORT_STATISTIC_EXPORT_COLUMNS, "report_statistics_export")

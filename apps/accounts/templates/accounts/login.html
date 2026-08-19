@@ -43,12 +43,7 @@
       </div>
 
       <div class="mb-3">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-          <label for="{{ form.password.id_for_label }}" class="form-label mb-0">Password</label>
-          <a href="{% url 'accounts:password_reset' %}" style="font-size:0.8125rem;" class="fc-text-primary">
-            Forgot password?
-          </a>
-        </div>
+        <label for="{{ form.password.id_for_label }}" class="form-label">Password</label>
         <div class="fc-search-bar">
           <i class="fc-search-icon bi bi-lock" aria-hidden="true"></i>
           {{ form.password }}

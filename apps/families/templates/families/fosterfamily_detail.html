@@ -2,7 +2,7 @@
 {% load static %}
 {% load role_tags %}
 
-{% block title %}{{ fosterfamily.family_name }} — Family Detail{% endblock %}
+{% block title %}{{ fosterfamily.family_name }} — Foster Family Profile{% endblock %}
 
 {% block content %}
 
@@ -15,51 +15,73 @@
         <li class="breadcrumb-item active" aria-current="page">{{ fosterfamily.family_name }}</li>
       </ol>
     </nav>
-    <h1 class="mt-1">Family Profile</h1>
+    <h1 class="mt-1">Foster Family Profile</h1>
   </div>
 </div>
 
 <div class="container pb-5">
 
   <!-- Header Card -->
-  <div class="fc-detail-header mb-4">
+  <div class="fc-detail-header mb-4 p-4 bg-white border rounded-3 shadow-xs">
     <div class="d-flex align-items-start gap-4 flex-wrap">
-      <div class="fc-detail-avatar" style="background:var(--fc-accent-light); color:var(--fc-accent);" aria-hidden="true">
-        <i class="bi bi-house-heart-fill"></i>
+      <div class="fc-detail-avatar overflow-hidden rounded-circle border" style="width:80px; height:80px; background:#eaf7ee; color:#1e7e34; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+        <i class="bi bi-house-heart-fill fs-2"></i>
       </div>
       <div class="flex-grow-1">
         <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
-          <h2 class="fc-detail-title mb-0">{{ fosterfamily.family_name }}</h2>
-          {% if fosterfamily.is_active %}
-            <span class="fc-badge-active badge">Active</span>
+          <h2 class="fc-detail-title mb-0 fs-3 font-weight-bold">{{ fosterfamily.family_name }}</h2>
+          {% if fosterfamily.license_status == 'Active' %}
+            <span class="badge bg-success fs-6">Active License</span>
           {% else %}
-            <span class="badge bg-secondary">Inactive</span>
+            <span class="badge bg-warning text-dark fs-6">{{ fosterfamily.license_status }}</span>
           {% endif %}
-          <span class="badge bg-light text-dark border">{{ fosterfamily.get_home_type_display }}</span>
+          <span class="badge bg-primary-subtle text-primary border border-primary-subtle">{{ fosterfamily.background_clearance_status }}</span>
         </div>
-        <p class="fc-detail-meta mb-1">
-          <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>{{ fosterfamily.state }}
-          &nbsp;·&nbsp;
-          <i class="bi bi-clock-history me-1" aria-hidden="true"></i>{{ fosterfamily.experience_years }} Years Experience
-          &nbsp;·&nbsp;
-          ID #{{ fosterfamily.pk }}
+        <p class="fc-detail-meta mb-1 text-muted" style="font-size:0.9rem;">
+          <strong>Primary Applicants:</strong> {{ fosterfamily.primary_applicant_name }} &nbsp;·&nbsp;
+          <i class="bi bi-telephone me-1"></i>{{ fosterfamily.phone_number }} &nbsp;·&nbsp;
+          <i class="bi bi-envelope me-1"></i>{{ fosterfamily.email_address }}
         </p>
-        <p class="fc-detail-meta mb-0" style="font-size:0.8125rem; color:var(--fc-text-muted);">
-          Registered {{ fosterfamily.created_at|date:"M d, Y" }} &nbsp;·&nbsp; Last updated {{ fosterfamily.updated_at|date:"M d, Y" }}
+        <p class="fc-detail-meta mb-0 text-muted" style="font-size:0.8125rem;">
+          <i class="bi bi-card-heading me-1"></i><strong>Identity Doc:</strong> {{ fosterfamily.identity_doc_number }} &nbsp;·&nbsp;
+          <i class="bi bi-person-workspace me-1"></i><strong>Licensing Worker:</strong> {{ fosterfamily.licensing_worker_name }}
         </p>
       </div>
 
+      <!-- Profile Completion Meter (Marked Location) -->
+      <div class="fc-completion-widget p-2 px-3 bg-light rounded border d-flex flex-column justify-content-center my-auto" style="min-width: 200px; max-width: 230px;" title="{% if fosterfamily.profile_completion_score.missing_fields %}Missing fields: {{ fosterfamily.profile_completion_score.missing_fields|join:', ' }}{% else %}All key fields complete!{% endif %}">
+        <div class="d-flex align-items-center justify-content-between gap-2 mb-1" style="font-size:0.8125rem;">
+          <span class="fw-bold text-dark"><i class="bi bi-pie-chart-fill me-1 text-primary"></i>Profile Completion</span>
+          <span class="badge {{ fosterfamily.profile_completion_score.badge_class }} fw-bold" style="font-size:0.75rem;">{{ fosterfamily.profile_completion_score.percentage }}%</span>
+        </div>
+        <div class="progress" style="height: 6px; background-color: #cbd5e1;" role="progressbar" aria-valuenow="{{ fosterfamily.profile_completion_score.percentage }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar {{ fosterfamily.profile_completion_score.bar_class }}" style="width: {{ fosterfamily.profile_completion_score.percentage }}%;"></div>
+        </div>
+        <div class="mt-1 d-flex justify-content-between align-items-center text-muted" style="font-size:0.7rem;">
+          <span>{{ fosterfamily.profile_completion_score.completed_count }}/{{ fosterfamily.profile_completion_score.total_count }} fields complete</span>
+          {% if fosterfamily.profile_completion_score.missing_fields %}
+            <span class="text-danger fw-semibold" title="Missing: {{ fosterfamily.profile_completion_score.missing_fields|join:', ' }}">
+              <i class="bi bi-exclamation-circle me-1"></i>{{ fosterfamily.profile_completion_score.missing_fields|length }} missing
+            </span>
+          {% else %}
+            <span class="text-success fw-semibold"><i class="bi bi-check-circle me-1"></i>Full</span>
+          {% endif %}
+        </div>
+      </div>
+
       <!-- Action Buttons -->
-      <div class="d-flex gap-2 flex-wrap">
+      <div class="d-flex gap-2 flex-wrap ms-auto">
         <a href="{% url 'predictions:create' %}?family={{ fosterfamily.pk }}"
            class="btn btn-primary btn-sm btn-icon">
           <i class="bi bi-cpu" aria-hidden="true"></i> Run Prediction
         </a>
-        {% if request.user|can_edit %}
+        {% if request.user|can_edit or fosterfamily.created_by == request.user %}
           <a href="{% url 'families:update' fosterfamily.pk %}"
              class="btn btn-outline-primary btn-sm btn-icon">
             <i class="bi bi-pencil-square" aria-hidden="true"></i> Edit
           </a>
+        {% endif %}
+        {% if request.user|can_edit %}
           <a href="{% url 'families:delete' fosterfamily.pk %}"
              class="btn btn-danger btn-sm btn-icon">
             <i class="bi bi-trash" aria-hidden="true"></i> Delete
@@ -70,86 +92,205 @@
     </div>
   </div>
 
-  <!-- Info Grid -->
+  <!-- Mandatory Licensing & Emergency Contact Grid -->
   <div class="fc-card mb-4">
-    <div class="fc-card-header">Family Overview</div>
+    <div class="fc-card-header bg-light fw-bold">
+      <i class="bi bi-shield-check me-2 text-success"></i>
+      Mandatory Licensing, Contact &amp; Clearance Basics
+    </div>
     <div class="fc-card-body">
       <div class="fc-info-grid">
 
         <div class="fc-info-item">
-          <div class="fc-info-item-label">Total Capacity</div>
-          <div class="fc-info-item-value">{{ fosterfamily.capacity }} child{% if fosterfamily.capacity != 1 %}ren{% endif %}</div>
-        </div>
-
-        <div class="fc-info-item">
-          <div class="fc-info-item-label">Current Occupancy</div>
-          <div class="fc-info-item-value">
-            {{ fosterfamily.current_occupancy }} child{% if fosterfamily.current_occupancy != 1 %}ren{% endif %}
-            <div class="progress mt-1" style="height:6px;" aria-label="Occupancy {{ fosterfamily.current_occupancy }} of {{ fosterfamily.capacity }}">
-              <div class="progress-bar {% if fosterfamily.current_occupancy >= fosterfamily.capacity %}bg-danger{% elif fosterfamily.current_occupancy > 0 %}bg-warning{% endif %}"
-                   role="progressbar"
-                   style="width:{% if fosterfamily.capacity > 0 %}{% widthratio fosterfamily.current_occupancy fosterfamily.capacity 100 %}{% else %}0{% endif %}%"></div>
-            </div>
+          <div class="fc-info-item-label">Home Capacity</div>
+          <div class="fc-info-item-value fw-bold fs-5 text-primary">
+            {{ fosterfamily.capacity }} Child{% if fosterfamily.capacity != 1 %}ren{% endif %} Limit
           </div>
         </div>
 
         <div class="fc-info-item">
-          <div class="fc-info-item-label">Available Slots</div>
+          <div class="fc-info-item-label">Background Clearances</div>
           <div class="fc-info-item-value">
-            <span class="{% if fosterfamily.available_slots > 0 %}fc-text-primary{% else %}fc-text-danger{% endif %}" style="font-size:1.125rem; font-weight:700;">
-              {{ fosterfamily.available_slots }} free
+            <span class="badge bg-success-subtle text-success border border-success-subtle px-2.5 py-1.5 fs-6">
+              <i class="bi bi-check-circle-fill me-1"></i> {{ fosterfamily.background_clearance_status }}
             </span>
           </div>
         </div>
 
         <div class="fc-info-item">
-          <div class="fc-info-item-label">Experience</div>
-          <div class="fc-info-item-value">{{ fosterfamily.experience_years }} years</div>
+          <div class="fc-info-item-label">Licensing Agency</div>
+          <div class="fc-info-item-value">{{ fosterfamily.licensing_agency }}</div>
         </div>
 
         <div class="fc-info-item">
-          <div class="fc-info-item-label">Home Setting</div>
-          <div class="fc-info-item-value">{{ fosterfamily.get_home_type_display }}</div>
+          <div class="fc-info-item-label">License Expiration</div>
+          <div class="fc-info-item-value">{{ fosterfamily.license_expiration|date:"M d, Y"|default:"Active (Annual Review)" }}</div>
         </div>
 
         <div class="fc-info-item">
-          <div class="fc-info-item-label">State</div>
-          <div class="fc-info-item-value">{{ fosterfamily.state }}</div>
+          <div class="fc-info-item-label">Assigned Licensing Worker</div>
+          <div class="fc-info-item-value fw-semibold">{{ fosterfamily.licensing_worker_name }}</div>
         </div>
 
         <div class="fc-info-item">
-          <div class="fc-info-item-label">Accepts Special Needs</div>
-          <div class="fc-info-item-value">
-            {% if fosterfamily.accepts_special_needs %}
-              <span class="fc-badge-yes badge">Yes</span>
+          <div class="fc-info-item-label">Residential Address</div>
+          <div class="fc-info-item-value">{{ fosterfamily.residential_address }}</div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Household Occupants & Optional Preferences -->
+  <div class="row g-4 mb-4">
+    <div class="col-12 col-lg-6">
+      <div class="fc-card h-100">
+        <div class="fc-card-header bg-light fw-bold">
+          <i class="bi bi-people-fill me-2 text-primary"></i>
+          Household Occupants &amp; Demographics
+        </div>
+        <div class="fc-card-body">
+          {% if fosterfamily.current_occupants %}
+            <div class="mb-3">
+              <div class="text-muted small fw-bold text-uppercase">Current Permanent Occupants</div>
+              <p class="mb-0 text-dark fw-medium">{{ fosterfamily.current_occupants }}</p>
+            </div>
+          {% endif %}
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Marital Status</span>
+              <span class="fw-medium">{{ fosterfamily.marital_status }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Household Composition</span>
+              <span class="fw-medium">{{ fosterfamily.household_composition }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Languages Spoken</span>
+              <span class="fw-medium">{{ fosterfamily.languages_spoken }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Preferred Age Group</span>
+              <span class="fw-medium">{{ fosterfamily.preferred_age_group }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Preferred Gender</span>
+              <span class="fw-medium">{{ fosterfamily.preferred_gender }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Preferred Special Needs</span>
+              <span class="fw-medium">{{ fosterfamily.preferred_special_needs }}</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between px-0">
+              <span class="text-muted">Accept Sibling Placements</span>
+              <span class="fw-medium">{{ fosterfamily.accept_sibling_placements }} (Max: {{ fosterfamily.max_sibling_group_accepted }})</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-6">
+      <div class="fc-card h-100">
+        <div class="fc-card-header bg-light fw-bold">
+          <i class="bi bi-award me-2 text-warning"></i>
+          Certifications &amp; Special Training
+        </div>
+        <div class="fc-card-body">
+          <div>
+            <div class="text-muted small fw-bold text-uppercase mb-1">Special Training &amp; Certifications</div>
+            {% if fosterfamily.special_trainings %}
+              <div class="d-flex flex-wrap gap-1.5">
+                {% for training in fosterfamily.special_trainings.split %}
+                  <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-2.5 py-1">{{ training|cut:"," }}</span>
+                {% endfor %}
+              </div>
             {% else %}
-              <span class="fc-badge-no badge">No</span>
+              <p class="mb-0 text-muted italic">None recorded.</p>
             {% endif %}
           </div>
         </div>
+      </div>
+    </div>
+  </div>
 
-        <div class="fc-info-item">
-          <div class="fc-info-item-label">Accepts Sibling Groups</div>
-          <div class="fc-info-item-value">
-            {% if fosterfamily.accepts_sibling_groups %}
-              <span class="fc-badge-yes badge">Yes</span>
-            {% else %}
-              <span class="fc-badge-no badge">No</span>
-            {% endif %}
+  <!-- Family Placement Assessment Card -->
+  <div class="row g-4 mb-4">
+    <div class="col-12">
+      <div class="fc-card">
+        <div class="fc-card-header bg-light fw-bold d-flex justify-content-between align-items-center">
+          <div>
+            <i class="bi bi-shield-check me-2 text-primary"></i>
+            Family Placement Assessment
+          </div>
+          <span class="badge bg-primary px-2.5 py-1">Support &amp; Capacity Evaluation</span>
+        </div>
+        <div class="fc-card-body">
+          <div class="row g-3">
+            <div class="col-12 col-md-3">
+              <div class="p-2.5 bg-light rounded border">
+                <div class="text-muted small fw-bold text-uppercase">Behavioral Support Capacity</div>
+                <div class="fw-bold fs-6 mt-1 text-primary">{{ fosterfamily.behavioral_support_capacity }}</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="p-2.5 bg-light rounded border">
+                <div class="text-muted small fw-bold text-uppercase">Mental Health Support Capacity</div>
+                <div class="fw-bold fs-6 mt-1 text-primary">{{ fosterfamily.mental_health_support_capacity }}</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="p-2.5 bg-light rounded border">
+                <div class="text-muted small fw-bold text-uppercase">Medical Support Capacity</div>
+                <div class="fw-bold fs-6 mt-1 text-primary">{{ fosterfamily.medical_support_capacity }}</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="p-2.5 bg-light rounded border">
+                <div class="text-muted small fw-bold text-uppercase">Parenting Experience</div>
+                <div class="fw-bold fs-6 mt-1 text-dark">{{ fosterfamily.parenting_experience_years }} Years</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+              <div class="p-2.5 bg-light rounded border">
+                <div class="text-muted small fw-bold text-uppercase">Previous Placements</div>
+                <div class="fw-bold fs-6 mt-1 text-dark">{{ fosterfamily.previous_foster_placements_count }} Hosted</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="p-2.5 bg-light rounded border">
+                <div class="text-muted small fw-bold text-uppercase">Successful Placements</div>
+                <div class="fw-bold fs-6 mt-1 text-success">{{ fosterfamily.successful_foster_placements_count }} Successful</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="p-2.5 bg-light rounded border">
+                <div class="text-muted small fw-bold text-uppercase">Housing Stability</div>
+                <div class="fw-bold fs-6 mt-1 text-dark">{{ fosterfamily.housing_stability }}</div>
+              </div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="p-2.5 bg-light rounded border">
+                <div class="text-muted small fw-bold text-uppercase">Family Support Network</div>
+                <div class="fw-bold fs-6 mt-1 text-dark">{{ fosterfamily.family_support_network }}</div>
+              </div>
+            </div>
+
+            <div class="col-12 col-md-6">
+              <div class="p-2.5 bg-light rounded border d-flex justify-content-between align-items-center">
+                <span class="text-muted small fw-bold text-uppercase">Long-Term Placement Willingness</span>
+                <span class="badge {% if fosterfamily.long_term_placement_willingness == 'Yes' %}bg-success{% else %}bg-secondary{% endif %} px-2.5 py-1 fs-6">{{ fosterfamily.long_term_placement_willingness }}</span>
+              </div>
+            </div>
+            <div class="col-12 col-md-6">
+              <div class="p-2.5 bg-light rounded border d-flex justify-content-between align-items-center">
+                <span class="text-muted small fw-bold text-uppercase">Therapy / Counseling Support Availability</span>
+                <span class="badge {% if fosterfamily.therapy_support_availability == 'Yes' %}bg-success{% else %}bg-secondary{% endif %} px-2.5 py-1 fs-6">{{ fosterfamily.therapy_support_availability }}</span>
+              </div>
+            </div>
           </div>
         </div>
-
-        <div class="fc-info-item">
-          <div class="fc-info-item-label">Active Status</div>
-          <div class="fc-info-item-value">
-            {% if fosterfamily.is_active %}
-              <span class="fc-badge-active badge">Active for Placements</span>
-            {% else %}
-              <span class="badge bg-secondary">Inactive</span>
-            {% endif %}
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
@@ -160,19 +301,18 @@
     <div class="col-12 col-lg-6">
       <div class="fc-table-wrapper">
         <div class="fc-table-header">
-          <h2 class="fc-table-title">
-            <i class="bi bi-shuffle me-2 fc-text-primary" aria-hidden="true"></i>
+          <h2 class="fc-table-title fs-6 fw-bold">
+            <i class="bi bi-shuffle me-2 fc-text-primary"></i>
             Placements at this Home
           </h2>
           {% if request.user|can_edit %}
             <a href="{% url 'placements:create' %}?family={{ fosterfamily.pk }}" class="btn btn-sm btn-primary btn-icon">
-              <i class="bi bi-plus-lg" aria-hidden="true"></i> Add
+              <i class="bi bi-plus-lg"></i> Add Placement
             </a>
           {% endif %}
-
         </div>
         <div class="table-responsive">
-          <table class="table table-hover" aria-label="Placements at family home">
+          <table class="table table-hover mb-0">
             <thead>
               <tr>
                 <th>Child</th>
@@ -184,7 +324,7 @@
             <tbody>
               {% for placement in fosterfamily.placements.all %}
                 <tr>
-                  <td style="font-weight:600; font-size:0.875rem;">{{ placement.child.first_name }}</td>
+                  <td style="font-weight:600; font-size:0.875rem;">{{ placement.child.full_name }}</td>
                   <td>
                     <span class="fc-badge-{{ placement.status }} badge">
                       {{ placement.get_status_display }}
@@ -192,15 +332,15 @@
                   </td>
                   <td style="font-size:0.8125rem;">{{ placement.start_date|date:"M d, Y"|default:"—" }}</td>
                   <td>
-                    <a href="{% url 'placements:detail' placement.pk %}" class="btn btn-sm btn-outline-primary" aria-label="View placement">
-                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    <a href="{% url 'placements:detail' placement.pk %}" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-eye"></i>
                     </a>
                   </td>
                 </tr>
               {% empty %}
                 <tr>
                   <td colspan="4" class="text-center py-4 fc-text-muted" style="font-size:0.875rem;">
-                    <i class="bi bi-inbox me-1" aria-hidden="true"></i>No placement history recorded.
+                    <i class="bi bi-inbox me-1"></i>No placement history recorded.
                   </td>
                 </tr>
               {% endfor %}
@@ -214,17 +354,16 @@
     <div class="col-12 col-lg-6">
       <div class="fc-table-wrapper">
         <div class="fc-table-header">
-          <h2 class="fc-table-title">
-            <i class="bi bi-cpu me-2 fc-text-primary" aria-hidden="true"></i>
+          <h2 class="fc-table-title fs-6 fw-bold">
+            <i class="bi bi-cpu me-2 fc-text-primary"></i>
             Predictions Evaluated
           </h2>
           <a href="{% url 'predictions:create' %}?family={{ fosterfamily.pk }}" class="btn btn-sm btn-primary btn-icon">
-            <i class="bi bi-plus-lg" aria-hidden="true"></i> Run New
+            <i class="bi bi-plus-lg"></i> Run New
           </a>
         </div>
-        </div>
         <div class="table-responsive">
-          <table class="table table-hover" aria-label="Predictions evaluated for family">
+          <table class="table table-hover mb-0">
             <thead>
               <tr>
                 <th>Child</th>
@@ -236,7 +375,7 @@
             <tbody>
               {% for pred in fosterfamily.predictions.all %}
                 <tr>
-                  <td style="font-weight:600; font-size:0.875rem;">{{ pred.child.first_name }}</td>
+                  <td style="font-weight:600; font-size:0.875rem;">{{ pred.child.full_name }}</td>
                   <td>
                     {% if pred.compatibility_score >= 0.7 %}
                       <span class="fc-score-badge high">{{ pred.compatibility_score|floatformat:2 }}</span>
@@ -248,15 +387,15 @@
                   </td>
                   <td style="font-size:0.8125rem; color:var(--fc-text-muted);">{{ pred.created_at|date:"M d, Y" }}</td>
                   <td>
-                    <a href="{% url 'predictions:detail' pred.pk %}" class="btn btn-sm btn-outline-primary" aria-label="View prediction">
-                      <i class="bi bi-eye" aria-hidden="true"></i>
+                    <a href="{% url 'predictions:detail' pred.pk %}" class="btn btn-sm btn-outline-primary">
+                      <i class="bi bi-eye"></i>
                     </a>
                   </td>
                 </tr>
               {% empty %}
                 <tr>
                   <td colspan="4" class="text-center py-4 fc-text-muted" style="font-size:0.875rem;">
-                    <i class="bi bi-inbox me-1" aria-hidden="true"></i>No predictions evaluated yet.
+                    <i class="bi bi-inbox me-1"></i>No predictions evaluated yet.
                   </td>
                 </tr>
               {% endfor %}

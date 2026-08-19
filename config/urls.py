@@ -27,10 +27,10 @@ urlpatterns = [
     path("families/", include(("apps.families.urls", "families"), namespace="families")),
     path("placements/", include(("apps.placements.urls", "placements"), namespace="placements")),
     path("predictions/", include(("apps.predictions.urls", "predictions"), namespace="predictions")),
-    path("reports/", include(("apps.reports.urls", "reports"), namespace="reports")),
 
     # Dashboard & analytics
     path("analytics/", include(("apps.analytics.urls", "analytics"), namespace="analytics")),
+    path("reports/", include(("apps.reports.urls", "reports"), namespace="reports")),
 
     # REST API (versioned under /api/v1/ so future breaking changes don't
     # disturb existing API consumers — a good practice to mention in docs)
@@ -38,8 +38,6 @@ urlpatterns = [
     path("api-auth/", include("rest_framework.urls")),  # DRF's browsable-API login
 ]
 
-# Serve user-uploaded media files (scraped report PDFs, exported charts)
-# during development. In production this is handled by the web server /
-# object storage instead — see config/settings/production.py notes.
+# Serve user-uploaded media files (avatars, document uploads) during development.
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

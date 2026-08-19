@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{% if object %}Edit {{ object.first_name }}{% else %}Add Child{% endif %}{% endblock %}
+{% block title %}{% if object %}Edit {{ object.full_name }}{% else %}Add Child{% endif %}{% endblock %}
 
 {% block content %}
 
@@ -12,7 +12,7 @@
         <li class="breadcrumb-item"><a href="{% url 'core:landing' %}">Home</a></li>
         <li class="breadcrumb-item"><a href="{% url 'children:index' %}">Children</a></li>
         {% if object %}
-          <li class="breadcrumb-item"><a href="{% url 'children:detail' object.pk %}">{{ object.first_name }}</a></li>
+          <li class="breadcrumb-item"><a href="{% url 'children:detail' object.pk %}">{{ object.full_name }}</a></li>
           <li class="breadcrumb-item active" aria-current="page">Edit</li>
         {% else %}
           <li class="breadcrumb-item active" aria-current="page">Add Child</li>
@@ -22,18 +22,18 @@
     <h1 class="mt-1">{% if object %}Edit Child Record{% else %}Add New Child{% endif %}</h1>
     <p class="fc-breadcrumb mt-1">
       {% if object %}
-        Update the profile for {{ object.first_name }}.
+        Update the welfare profile and medical history for {{ object.full_name }}.
       {% else %}
-        Register a new child in the foster care system.
+        Register a new child record in the foster care system.
       {% endif %}
     </p>
   </div>
 </div>
 
 <div class="container pb-5">
-  <div style="max-width:720px;">
+  <div style="max-width:850px;">
 
-    <form method="post" novalidate aria-label="{% if object %}Edit child{% else %}Add child{% endif %} form">
+    <form method="post" enctype="multipart/form-data" novalidate aria-label="{% if object %}Edit child{% else %}Add child{% endif %} form">
       {% csrf_token %}
 
       {% if form.non_field_errors %}
@@ -43,172 +43,217 @@
         </div>
       {% endif %}
 
-      <!-- Section 1: Identity -->
+      <!-- Section 1: MANDATORY / REQUIRED FIELDS -->
       <div class="fc-form-section">
-        <h2 class="fc-form-section-title">
-          <i class="bi bi-person-badge fc-text-primary" aria-hidden="true"></i>
-          Identity &amp; Demographics
-        </h2>
-        <div class="row g-3">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+          <h2 class="fc-form-section-title mb-0">
+            <i class="bi bi-person-badge-fill fc-text-primary" aria-hidden="true"></i>
+            Mandatory Child Identity &amp; Legal Status
+          </h2>
+          <span class="badge bg-danger-subtle text-danger fw-semibold px-2.5 py-1">Required</span>
+        </div>
 
-          <div class="col-12 col-sm-6">
+        <div class="row g-3">
+          <!-- Full Name -->
+          <div class="col-12 col-md-4">
             <label for="{{ form.first_name.id_for_label }}" class="form-label">
-              First Name <span class="text-danger" aria-hidden="true">*</span>
+              First Name <span class="text-danger">*</span>
             </label>
-            <input type="text" id="{{ form.first_name.id_for_label }}"
-                   name="{{ form.first_name.html_name }}"
-                   class="form-control {% if form.first_name.errors %}is-invalid{% endif %}"
-                   value="{{ form.first_name.value|default:'' }}"
-                   placeholder="Synthetic name only"
-                   required>
-            <div class="form-text">Synthetic identifier — not a real child's name.</div>
+            {{ form.first_name }}
             {% if form.first_name.errors %}
-              <div class="invalid-feedback">{{ form.first_name.errors.as_text }}</div>
+              <div class="invalid-feedback d-block">{{ form.first_name.errors.as_text }}</div>
             {% endif %}
           </div>
 
-          <div class="col-12 col-sm-6">
+          <div class="col-12 col-md-4">
+            <label for="{{ form.middle_name.id_for_label }}" class="form-label">Middle Name</label>
+            {{ form.middle_name }}
+            {% if form.middle_name.errors %}
+              <div class="invalid-feedback d-block">{{ form.middle_name.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.last_name.id_for_label }}" class="form-label">Last Name</label>
+            {{ form.last_name }}
+            {% if form.last_name.errors %}
+              <div class="invalid-feedback d-block">{{ form.last_name.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <!-- DOB & Age & Gender -->
+          <div class="col-12 col-sm-4">
+            <label for="{{ form.date_of_birth.id_for_label }}" class="form-label">
+              Date of Birth <span class="text-danger">*</span>
+            </label>
+            {{ form.date_of_birth }}
+            {% if form.date_of_birth.errors %}
+              <div class="invalid-feedback d-block">{{ form.date_of_birth.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-sm-4">
             <label for="{{ form.age.id_for_label }}" class="form-label">
-              Age (years) <span class="text-danger" aria-hidden="true">*</span>
+              Age (Years) <span class="text-danger">*</span>
             </label>
-            <input type="number" id="{{ form.age.id_for_label }}"
-                   name="{{ form.age.html_name }}"
-                   class="form-control {% if form.age.errors %}is-invalid{% endif %}"
-                   value="{{ form.age.value|default:'' }}"
-                   min="0" max="17" required>
+            {{ form.age }}
             {% if form.age.errors %}
-              <div class="invalid-feedback">{{ form.age.errors.as_text }}</div>
+              <div class="invalid-feedback d-block">{{ form.age.errors.as_text }}</div>
             {% endif %}
           </div>
 
-          <div class="col-12 col-sm-6">
+          <div class="col-12 col-sm-4">
             <label for="{{ form.gender.id_for_label }}" class="form-label">
-              Gender <span class="text-danger" aria-hidden="true">*</span>
+              Gender / Sex <span class="text-danger">*</span>
             </label>
-            <select id="{{ form.gender.id_for_label }}"
-                    name="{{ form.gender.html_name }}"
-                    class="form-select {% if form.gender.errors %}is-invalid{% endif %}" required>
-              <option value="">Select…</option>
-              <option value="M" {% if form.gender.value == 'M' %}selected{% endif %}>Male</option>
-              <option value="F" {% if form.gender.value == 'F' %}selected{% endif %}>Female</option>
-              <option value="O" {% if form.gender.value == 'O' %}selected{% endif %}>Other</option>
-            </select>
+            {{ form.gender }}
             {% if form.gender.errors %}
-              <div class="invalid-feedback">{{ form.gender.errors.as_text }}</div>
+              <div class="invalid-feedback d-block">{{ form.gender.errors.as_text }}</div>
             {% endif %}
           </div>
 
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.state.id_for_label }}" class="form-label">
-              State <span class="text-danger" aria-hidden="true">*</span>
+          <!-- Legal Status -->
+          <div class="col-12 col-md-6">
+            <label for="{{ form.legal_status.id_for_label }}" class="form-label">
+              Legal Status / Custody Type <span class="text-danger">*</span>
             </label>
-            <input type="text" id="{{ form.state.id_for_label }}"
-                   name="{{ form.state.html_name }}"
-                   class="form-control {% if form.state.errors %}is-invalid{% endif %}"
-                   value="{{ form.state.value|default:'' }}"
-                   placeholder="e.g. California" required>
-            {% if form.state.errors %}
-              <div class="invalid-feedback">{{ form.state.errors.as_text }}</div>
+            {{ form.legal_status }}
+            <div class="form-text">e.g., Temporary custody, permanent ward, voluntary placement, court-ordered.</div>
+            {% if form.legal_status.errors %}
+              <div class="invalid-feedback d-block">{{ form.legal_status.errors.as_text }}</div>
             {% endif %}
           </div>
 
-          <div class="col-12">
-            <label for="{{ form.education_level.id_for_label }}" class="form-label">
-              Education Level <span class="text-danger" aria-hidden="true">*</span>
+          <!-- Photo Upload -->
+          <div class="col-12 col-md-6">
+            <label for="{{ form.photo.id_for_label }}" class="form-label">Child Photograph</label>
+            {{ form.photo }}
+            <div class="form-text">Upload a recent identification photograph.</div>
+            {% if form.photo.errors %}
+              <div class="invalid-feedback d-block">{{ form.photo.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Caseworker Info -->
+          <div class="col-12 col-md-6">
+            <label for="{{ form.caseworker_name.id_for_label }}" class="form-label">
+              Assigned Caseworker / Social Worker <span class="text-danger">*</span>
             </label>
-            <input type="text" id="{{ form.education_level.id_for_label }}"
-                   name="{{ form.education_level.html_name }}"
-                   class="form-control {% if form.education_level.errors %}is-invalid{% endif %}"
-                   value="{{ form.education_level.value|default:'' }}"
-                   placeholder="e.g. Elementary, Middle School, High School">
-            {% if form.education_level.errors %}
-              <div class="invalid-feedback">{{ form.education_level.errors.as_text }}</div>
+            {{ form.caseworker_name }}
+            {% if form.caseworker_name.errors %}
+              <div class="invalid-feedback d-block">{{ form.caseworker_name.errors.as_text }}</div>
             {% endif %}
           </div>
 
-        </div>
-      </div>
-
-      <!-- Section 2: Care Details -->
-      <div class="fc-form-section">
-        <h2 class="fc-form-section-title">
-          <i class="bi bi-clipboard2-pulse fc-text-primary" aria-hidden="true"></i>
-          Care Details
-        </h2>
-        <div class="row g-3">
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.sibling_group_size.id_for_label }}" class="form-label">
-              Sibling Group Size <span class="text-danger" aria-hidden="true">*</span>
-            </label>
-            <input type="number" id="{{ form.sibling_group_size.id_for_label }}"
-                   name="{{ form.sibling_group_size.html_name }}"
-                   class="form-control {% if form.sibling_group_size.errors %}is-invalid{% endif %}"
-                   value="{{ form.sibling_group_size.value|default:'1' }}"
-                   min="1" required>
-            <div class="form-text">1 = no siblings needing joint placement.</div>
-            {% if form.sibling_group_size.errors %}
-              <div class="invalid-feedback">{{ form.sibling_group_size.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.behavioral_notes_score.id_for_label }}" class="form-label">
-              Behavioral Score (0.0–1.0) <span class="text-danger" aria-hidden="true">*</span>
-            </label>
-            <input type="number" id="{{ form.behavioral_notes_score.id_for_label }}"
-                   name="{{ form.behavioral_notes_score.html_name }}"
-                   class="form-control {% if form.behavioral_notes_score.errors %}is-invalid{% endif %}"
-                   value="{{ form.behavioral_notes_score.value|default:'' }}"
-                   step="0.01" min="0" max="1" required>
-            <div class="form-text">Synthetic severity index. Higher = more severe.</div>
-            {% if form.behavioral_notes_score.errors %}
-              <div class="invalid-feedback">{{ form.behavioral_notes_score.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-12 col-sm-6">
-            <label for="{{ form.time_in_care_months.id_for_label }}" class="form-label">
-              Time in Care (months) <span class="text-danger" aria-hidden="true">*</span>
-            </label>
-            <input type="number" id="{{ form.time_in_care_months.id_for_label }}"
-                   name="{{ form.time_in_care_months.html_name }}"
-                   class="form-control {% if form.time_in_care_months.errors %}is-invalid{% endif %}"
-                   value="{{ form.time_in_care_months.value|default:'' }}"
-                   min="0" required>
-            {% if form.time_in_care_months.errors %}
-              <div class="invalid-feedback">{{ form.time_in_care_months.errors.as_text }}</div>
-            {% endif %}
-          </div>
-
-          <div class="col-12 col-sm-6">
-            <div class="pt-4 mt-2 d-flex flex-column gap-3">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox"
-                       id="{{ form.special_needs.id_for_label }}"
-                       name="{{ form.special_needs.html_name }}"
-                       {% if form.special_needs.value %}checked{% endif %}>
-                <label class="form-check-label" for="{{ form.special_needs.id_for_label }}">
-                  Has Special Needs
-                </label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox"
-                       id="{{ form.is_placed.id_for_label }}"
-                       name="{{ form.is_placed.html_name }}"
-                       {% if form.is_placed.value %}checked{% endif %}>
-                <label class="form-check-label" for="{{ form.is_placed.id_for_label }}">
-                  Currently Placed
-                </label>
-              </div>
+          <div class="col-12 col-md-6">
+            <label for="{{ form.caseworker_contact.id_for_label }}" class="form-label">Caseworker Phone Number</label>
+            <div class="input-group">
+              <span class="input-group-text fw-bold bg-light text-muted">+91</span>
+              {{ form.caseworker_contact }}
             </div>
+            {% if form.caseworker_contact.errors %}
+              <div class="invalid-feedback d-block">{{ form.caseworker_contact.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <!-- Medical Basics -->
+          <div class="col-12 col-md-4">
+            <label for="{{ form.blood_group.id_for_label }}" class="form-label">
+              Blood Group <span class="text-danger">*</span>
+            </label>
+            {{ form.blood_group }}
+            {% if form.blood_group.errors %}
+              <div class="invalid-feedback d-block">{{ form.blood_group.errors.as_text }}</div>
+            {% endif %}
+          </div>
+
+          <div class="col-12 col-md-8">
+            <label for="{{ form.severe_allergies.id_for_label }}" class="form-label">Known Severe Allergies</label>
+            {{ form.severe_allergies }}
+            <div class="form-text">e.g., Peanuts, penicillin, bee stings (or "None").</div>
+            {% if form.severe_allergies.errors %}
+              <div class="invalid-feedback d-block">{{ form.severe_allergies.errors.as_text }}</div>
+            {% endif %}
           </div>
 
         </div>
       </div>
+
+      <!-- Section 2: OPTIONAL CULTURAL, SPECIAL NEEDS & SUPPORT PROFILE -->
+      <div class="fc-form-section mt-4">
+        <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-2">
+          <h2 class="fc-form-section-title mb-0">
+            <i class="bi bi-card-checklist fc-text-primary" aria-hidden="true"></i>
+            Optional Cultural &amp; Special Needs Profile
+          </h2>
+          <span class="badge bg-light text-dark border fw-normal px-2.5 py-1">Optional</span>
+        </div>
+
+        <div class="row g-3">
+          <!-- Row 1: Cultural & Language -->
+          <div class="col-12 col-md-4">
+            <label for="{{ form.ethnicity.id_for_label }}" class="form-label">Ethnicity / Cultural Background</label>
+            {{ form.ethnicity }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.languages_spoken.id_for_label }}" class="form-label">Primary Language Spoken</label>
+            {{ form.languages_spoken }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.special_needs.id_for_label }}" class="form-label">Special Needs Category</label>
+            {{ form.special_needs }}
+          </div>
+
+          <!-- Row 2: Support Levels -->
+          <div class="col-12 col-md-4">
+            <label for="{{ form.behavioral_support_level.id_for_label }}" class="form-label">Behavioral Support Level</label>
+            {{ form.behavioral_support_level }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.mental_health_support_level.id_for_label }}" class="form-label">Mental Health Support Level</label>
+            {{ form.mental_health_support_level }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.medical_needs_level.id_for_label }}" class="form-label">Medical Needs Level</label>
+            {{ form.medical_needs_level }}
+          </div>
+
+          <!-- Row 3: Placement, History & Education -->
+          <div class="col-12 col-md-3">
+            <label for="{{ form.sibling_group_size.id_for_label }}" class="form-label">Sibling Group Size</label>
+            {{ form.sibling_group_size }}
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label for="{{ form.needs_sibling_placement.id_for_label }}" class="form-label">Sibling Placement Required</label>
+            {{ form.needs_sibling_placement }}
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label for="{{ form.previous_foster_placements.id_for_label }}" class="form-label">Previous Foster Placements</label>
+            {{ form.previous_foster_placements }}
+          </div>
+
+          <div class="col-12 col-md-3">
+            <label for="{{ form.trauma_severity_level.id_for_label }}" class="form-label">Trauma Severity Level</label>
+            {{ form.trauma_severity_level }}
+          </div>
+
+          <div class="col-12 col-md-4">
+            <label for="{{ form.school_attendance_status.id_for_label }}" class="form-label">School Attendance Status</label>
+            {{ form.school_attendance_status }}
+          </div>
+        </div>
+      </div>
+
+
 
       <!-- Actions -->
-      <div class="d-flex gap-3">
+      <div class="d-flex gap-3 mt-4">
         <button type="submit" class="btn btn-primary btn-lg btn-icon">
           <i class="bi bi-check-circle-fill" aria-hidden="true"></i>
           {% if object %}Save Changes{% else %}Add Child{% endif %}
@@ -224,4 +269,34 @@
 
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const dobInput = document.getElementById('{{ form.date_of_birth.id_for_label }}');
+    const ageInput = document.getElementById('{{ form.age.id_for_label }}');
+
+    function updateAgeFromDOB() {
+      if (!dobInput || !dobInput.value) return;
+      const dob = new Date(dobInput.value);
+      if (isNaN(dob.getTime())) return;
+
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const monthDiff = today.getMonth() - dob.getMonth();
+
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+
+      if (age >= 0 && age <= 120) {
+        ageInput.value = age;
+      }
+    }
+
+    if (dobInput && ageInput) {
+      dobInput.addEventListener('change', updateAgeFromDOB);
+      dobInput.addEventListener('input', updateAgeFromDOB);
+    }
+  });
+</script>
 {% endblock %}

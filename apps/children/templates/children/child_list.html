@@ -21,10 +21,7 @@
         <p class="fc-breadcrumb mt-1">{{ paginator.count }} child record{{ paginator.count|pluralize }} in the system</p>
       </div>
       <div class="d-flex gap-2 flex-wrap">
-        <a href="{% url 'children:export_csv' %}?{{ query_params }}" class="btn btn-secondary btn-sm btn-icon" aria-label="Export current view as CSV">
-          <i class="bi bi-filetype-csv" aria-hidden="true"></i> Export CSV
-        </a>
-        {% if request.user|can_edit %}
+        {% if request.user.is_authenticated %}
           <a href="{% url 'children:create' %}" class="btn btn-primary btn-sm btn-icon">
             <i class="bi bi-plus-lg" aria-hidden="true"></i> Add Child
           </a>
@@ -134,13 +131,12 @@
       <table class="table table-hover table-striped" aria-label="Children registry">
         <thead>
           <tr>
-            <th scope="col">Name</th>
+            <th scope="col">Child Name</th>
+            <th scope="col">Legal Status</th>
             <th scope="col">Age</th>
             <th scope="col">Gender</th>
-            <th scope="col">State</th>
-            <th scope="col">Special Needs</th>
-            <th scope="col">Sibling Group</th>
-            <th scope="col">Time in Care</th>
+            <th scope="col">Caseworker</th>
+            <th scope="col">Profile Completion</th>
             <th scope="col">Status</th>
             <th scope="col" aria-label="Actions"></th>
           </tr>
@@ -149,21 +145,31 @@
           {% for child in children %}
             <tr>
               <td>
-                <div style="font-weight:600;">{{ child.first_name }}</div>
-                <div style="font-size:0.75rem; color:var(--fc-text-muted);">#{{ child.pk }}</div>
+                <div class="d-flex align-items-center gap-2">
+                  <div class="overflow-hidden rounded-circle border" style="width:36px; height:36px; background:#f0f4f8; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    {% if child.photo %}
+                      <img src="{{ child.photo.url }}" alt="{{ child.full_name }}" style="width:100%; height:100%; object-fit:cover;">
+                    {% else %}
+                      <i class="bi bi-person-fill text-muted"></i>
+                    {% endif %}
+                  </div>
+                  <div>
+                    <div style="font-weight:600;"><a href="{% url 'children:detail' child.pk %}" class="text-decoration-none text-dark">{{ child.full_name }}</a></div>
+                    <div style="font-size:0.75rem; color:var(--fc-text-muted);">#{{ child.pk }} · {{ child.state }}</div>
+                  </div>
+                </div>
               </td>
+              <td><span class="badge bg-light text-dark border">{{ child.legal_status }}</span></td>
               <td>{{ child.age }} yrs</td>
               <td>{{ child.get_gender_display }}</td>
-              <td>{{ child.state }}</td>
+              <td style="font-size:0.8125rem;">{{ child.caseworker_name }}</td>
               <td>
-                {% if child.special_needs %}
-                  <span class="fc-badge-yes badge">Yes</span>
-                {% else %}
-                  <span class="fc-badge-no badge">No</span>
-                {% endif %}
+                {% with score=child.profile_completion_score %}
+                  <span class="badge {{ score.badge_class }} fw-semibold px-2 py-1">
+                    {% if score.is_complete %}Complete 100%{% else %}Incomplete {{ score.percentage }}%{% endif %}
+                  </span>
+                {% endwith %}
               </td>
-              <td>{{ child.sibling_group_size }}</td>
-              <td>{{ child.time_in_care_months }} mo</td>
               <td>
                 {% if child.is_placed %}
                   <span class="fc-badge-placed badge">Placed</span>
@@ -205,7 +211,7 @@
                       No child records have been added yet.
                     {% endif %}
                   </p>
-                  {% if request.user|can_edit %}
+                  {% if request.user.is_authenticated %}
                     <a href="{% url 'children:create' %}" class="btn btn-primary btn-icon">
                       <i class="bi bi-plus-lg" aria-hidden="true"></i> Add First Child
                     </a>

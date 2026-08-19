@@ -14,8 +14,6 @@ from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from apps.accounts.models import Profile
-from apps.api.permissions import IsAdminOrCaseWorkerOrReadOnly
 from apps.api.serializers.predictions_serializers import PredictionRequestSerializer, PredictionSerializer
 from apps.predictions.models import Prediction
 from ml.inference.predict import ModelNotTrainedError, predict_compatibility
@@ -48,16 +46,22 @@ class PredictionViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewse
             result = predict_compatibility(child, family)
         except ModelNotTrainedError as exc:
             return Response({"detail": str(exc)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
+        except Exception as exc:
+            return Response(
+                {"detail": f"Failed to calculate prediction score: {str(exc)}"},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         prediction = Prediction.objects.create(
             child=child,
             family=family,
             compatibility_score=result["compatibility_score"],
             model_name=result["model_name"],
-            model_version="v1",
+            model_version=result.get("model_version", "v2.0"),
             predicted_by=request.user,
             explanation_data=result.get("explanation", {}),
         )
 
         output_serializer = PredictionSerializer(prediction)
         return Response(output_serializer.data, status=status.HTTP_201_CREATED)
+
